@@ -31,20 +31,38 @@ class Resource(object):
         return obj
 
     def _request(self, method, **kwargs):
-        url = urlparse.urljoin(self.domain, self.endpoint)
+        if kwargs.has_key("url"):
+            url = kwargs.pop("url")
+        else:
+            url = urlparse.urljoin(self.domain, self.endpoint)
 
-        if hasattr(self, "object_id"):
-            url = urlparse.urljoin(url, str(self.object_id))
+            if hasattr(self, "object_id"):
+                url = urlparse.urljoin(url, str(self.object_id))
+
+        if kwargs.has_key("body"):
+            body = kwargs.pop("body")
+        else:
+            body = None
 
         if kwargs:
             url = "?".join([url, urllib.urlencode(kwargs)])
 
-        resp, content = self.http_client.request(url, method)
-        return json.loads(content)
-
+        return self.http_client.request(url, method, body=body, headers={"content-type": "application/json"})
     
     def get(self, **kwargs):
-        return self._request("GET", **kwargs)
+        resp, content = self._request("GET", **kwargs)
+        return json.loads(content)
+
+    def post(self, data, **kwargs):
+        kwargs.update({
+            "body": json.dumps(data)
+        })
+        resp, content = self._request("POST", **kwargs)
+        if resp.status == 201:
+            return self.get(url=resp["location"])
+        else:
+            # @@@ Need to be Some sort of Error Here or Something
+            return
 
 
 class APIMeta(object):
