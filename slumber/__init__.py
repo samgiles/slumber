@@ -15,6 +15,7 @@ import json
 import urllib
 import urlparse
 
+from slumber import exceptions
 from slumber.http import HttpClient
 
 class Resource(object):
@@ -50,7 +51,12 @@ class Resource(object):
         if kwargs:
             url = "?".join([url, urllib.urlencode(kwargs)])
 
-        return self.http_client.request(url, method, body=body, headers={"content-type": "application/json"})
+        resp, content = self.http_client.request(url, method, body=body, headers={"content-type": "application/json"})
+
+        if 400 <= resp.status <= 499:
+            raise exceptions.SlumberResourceNotFound("Unable to Find a Resource at %s" % url)
+
+        return resp, content
     
     def get(self, **kwargs):
         resp, content = self._request("GET", **kwargs)
