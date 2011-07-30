@@ -13,13 +13,13 @@ class SlumberHttpBaseException(SlumberBaseException):
             setattr(self, key, value)
         super(SlumberHttpBaseException, self).__init__(*args)
 
-class SlumberClientError(SlumberHttpBaseException):
+class SlumberHttpClientError(SlumberHttpBaseException):
     """
     Called when the server tells us there was a client error (4xx).
     """
     
 
-class SlumberServerError(SlumberHttpBaseException):
+class SlumberHttpServerError(SlumberHttpBaseException):
     """
     Called when the server tells us there was a server error (5xx).
     """
