@@ -54,9 +54,9 @@ class Resource(object):
         resp, content = self.http_client.request(url, method, body=body, headers={"content-type": "application/json"})
 
         if 400 <= resp.status <= 499:
-            raise exceptions.SlumberClientError("Client Error %s: %s" % (resp.status, url))
+            raise exceptions.SlumberClientError("Client Error %s: %s" % (resp.status, url), response=resp, content=content)
         elif 500 <= resp.status <= 599:
-            raise exceptions.SlumberServerError("Server Error %s: %s" % (resp.status, url))
+            raise exceptions.SlumberServerError("Server Error %s: %s" % (resp.status, url), response=resp, content=content)
 
         return resp, content
     
