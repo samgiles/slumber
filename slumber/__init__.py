@@ -35,7 +35,7 @@ class Resource(object):
             self.schema = json.loads(content)
 
 
-class DefaultAPIMeta(object):
+class APIMeta(object):
 
     resources = {}
     http = {
@@ -88,7 +88,7 @@ class API(object):
         else:
             meta_dict = {}
 
-        self._meta = DefaultAPIMeta(**meta_dict)
+        self._meta = APIMeta(**meta_dict)
 
         if api_url is not None:
             # Attempt to parse the url into it's parts
