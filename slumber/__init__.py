@@ -54,7 +54,7 @@ class Resource(object):
         resp, content = self.http_client.request(url, method, body=body, headers={"content-type": "application/json"})
 
         if 400 <= resp.status <= 499:
-            raise exceptions.SlumberResourceNotFound("Unable to Find a Resource at %s" % url)
+            raise exceptions.SlumberClientError("Client Error %s: %s" % (resp.status, url))
 
         return resp, content
     

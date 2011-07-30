@@ -1,4 +1,4 @@
-class SlumberResourceNotFound(Exception):
+class SlumberClientError(Exception):
     """
-    Called When a resource by that name is not found at the endpoint url.
+    Called when the server tells us there was a client Error (4xx).
     """
