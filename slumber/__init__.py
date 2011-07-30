@@ -146,7 +146,7 @@ class API(object):
     class Meta:
         pass
 
-    def __init__(self, api_url=None, discover_resources=True):
+    def __init__(self, api_url=None, discover_resources=False):
         class_meta = getattr(self, "Meta", None)
         if class_meta is not None:
             keys = [x for x in dir(class_meta) if not x.startswith("_")]
