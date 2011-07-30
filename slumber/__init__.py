@@ -27,8 +27,8 @@ class Resource(object):
         obj = copy.deepcopy(self)
         obj.object_id = id
         return obj
-    
-    def get(self, **kwargs):
+
+    def _request(self, method, **kwargs):
         url = urlparse.urljoin(self.domain, self.endpoint)
 
         if hasattr(self, "object_id"):
@@ -36,9 +36,13 @@ class Resource(object):
 
         if kwargs:
             url = "?".join([url, urllib.urlencode(kwargs)])
-        
-        resp, content = self.http_client.get(url)
+
+        resp, content = self.http_client.request(url, method)
         return json.loads(content)
+
+    
+    def get(self, **kwargs):
+        return self._request("GET", **kwargs)
 
 
 class APIMeta(object):
