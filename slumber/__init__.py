@@ -81,6 +81,14 @@ class Resource(object):
             # @@@ Do Something Else
             return
 
+    def delete(self, **kwargs):
+        resp, content = self._request("DELETE", **kwargs)
+        if resp.status == 204:
+            return True
+        else:
+            # @@@ Do Something Else
+            return
+
 
 class APIMeta(object):
 
