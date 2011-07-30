@@ -55,6 +55,8 @@ class Resource(object):
 
         if 400 <= resp.status <= 499:
             raise exceptions.SlumberClientError("Client Error %s: %s" % (resp.status, url))
+        elif 500 <= resp.status <= 599:
+            raise exceptions.SlumberServerError("Server Error %s: %s" % (resp.status, url))
 
         return resp, content
     
