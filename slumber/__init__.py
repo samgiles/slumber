@@ -39,6 +39,9 @@ class Resource(object):
             if hasattr(self, "object_id"):
                 url = urlparse.urljoin(url, str(self.object_id))
 
+            if not url.endswith("/"):
+                url += "/"
+
         if kwargs.has_key("body"):
             body = kwargs.pop("body")
         else:
@@ -65,6 +68,17 @@ class Resource(object):
                 return content
         else:
             # @@@ Need to be Some sort of Error Here or Something
+            return
+
+    def put(self, data, **kwargs):
+        kwargs.update({
+            "body": json.dumps(data)
+        })
+        resp, content = self._request("PUT", **kwargs)
+        if resp.status == "204":
+            return True
+        else:
+            # @@@ Do Something Else
             return
 
 
