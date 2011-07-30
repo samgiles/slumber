@@ -58,8 +58,11 @@ class Resource(object):
             "body": json.dumps(data)
         })
         resp, content = self._request("POST", **kwargs)
-        if resp.status == 201:
-            return self.get(url=resp["location"])
+        if resp.status.startswith("2"):
+            if resp.status == "201":
+                return self.get(url=resp["location"])
+            else:
+                return content
         else:
             # @@@ Need to be Some sort of Error Here or Something
             return
