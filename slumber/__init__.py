@@ -9,7 +9,9 @@ __url__ = "https://github.com/dstufft/slumber/"
 __all__ = ["Resource", "API"]
 
 import copy
-import json # @@@ Should we look for one with speedups?
+# @@@ Should we look for one with speedups?
+# @@@ Python 2.5 Compatibility?
+import json
 import urllib
 import urlparse
 
