@@ -102,6 +102,14 @@ class API(object):
 
         self.discover_resources()
 
+    def __getattr__(self, item):
+        if item != "Meta":
+            try:
+                return self._meta.resources[item]
+            except KeyError:
+                self._meta.resources[item] = Resource(self._meta.base_url)
+                return self._meta.resources[item]
+
     def discover_resources(self):
         resp, content = self.http_client.get(self._meta.api_url)
 
@@ -113,4 +121,4 @@ class API(object):
             kwargs.update({
                 "domain": self._meta.base_url,
             })
-            self._meta.resources[name] = Resource(**kwargs) 
+            self._meta.resources[name] = Resource(**kwargs)
