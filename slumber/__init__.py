@@ -138,7 +138,7 @@ class API(object):
     class Meta:
         pass
 
-    def __init__(self, api_url=None):
+    def __init__(self, api_url=None, discover_resources=True):
         class_meta = getattr(self, "Meta", None)
         if class_meta is not None:
             keys = [x for x in dir(class_meta) if not x.startswith("_")]
@@ -158,7 +158,8 @@ class API(object):
 
         self.http_client = HttpClient()
 
-        self.discover_resources()
+        if discover_resources:
+            self.discover_resources()
 
     def __getattr__(self, item):
         try:
