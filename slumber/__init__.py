@@ -8,7 +8,6 @@ __url__ = "https://github.com/dstufft/slumber/"
 
 __all__ = ["Resource", "API"]
 
-import httplib2
 import json # @@@ Should we look for one with speedups?
 import urlparse
 
@@ -26,12 +25,13 @@ class Resource(object):
         if schema is not None:
             self.endpoints["schema"] = schema
 
+        self.http_client = HttpClient()
+
         self.discover_schema()
 
     def discover_schema(self):
         if self.endpoints.has_key("schema"):
-            h = httplib2.Http()
-            resp, content = h.request(self.domain + self.endpoints["schema"])
+            resp, content = self.http_client.get(self.domain + self.endpoints["schema"])
             self.schema = json.loads(content)
 
 
