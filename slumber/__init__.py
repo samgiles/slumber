@@ -10,6 +10,7 @@ __all__ = ["Resource", "API"]
 
 import copy
 import json # @@@ Should we look for one with speedups?
+import urllib
 import urlparse
 
 from slumber.http import HttpClient
@@ -32,6 +33,9 @@ class Resource(object):
 
         if hasattr(self, "object_id"):
             url = urlparse.urljoin(url, str(self.object_id))
+
+        if kwargs:
+            url = "?".join([url, urllib.urlencode(kwargs)])
         
         resp, content = self.http_client.get(url)
         return json.loads(content)
