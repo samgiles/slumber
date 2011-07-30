@@ -62,16 +62,22 @@ class Resource(object):
     
     def get(self, **kwargs):
         resp, content = self._request("GET", **kwargs)
-        return json.loads(content)
+        if 200 <= resp.status <= 299:
+            if resp.status == 200:
+                return json.loads(content)
+            else:
+                return content
+        else:
+            return # @@@ We should probably do some sort of error here? (Is this even possible?)
 
     def post(self, data, **kwargs):
         kwargs.update({
             "body": json.dumps(data)
         })
         resp, content = self._request("POST", **kwargs)
-        if resp.status.startswith("2"):
-            if resp.status == "201":
-                return self.get(url=resp["location"])
+        if 200 <= resp.status <= 299:
+            if resp.status == 201:
+                return self.get(url=resp.location)
             else:
                 return content
         else:
@@ -83,19 +89,23 @@ class Resource(object):
             "body": json.dumps(data)
         })
         resp, content = self._request("PUT", **kwargs)
-        if resp.status == "204":
-            return True
+        if 200 <= resp.status <= 299:
+            if resp.status == 204:
+                return True
+            else:
+                return True # @@@ Should this really be True?
         else:
-            # @@@ Do Something Else
-            return
+            return False
 
     def delete(self, **kwargs):
         resp, content = self._request("DELETE", **kwargs)
-        if resp.status == 204:
-            return True
+        if 200 <= resp.status <= 299:
+            if resp.status == 204:
+                return True
+            else:
+                return True # @@@ Should this really be True?
         else:
-            # @@@ Do Something Else
-            return
+            return False
 
 
 class APIMeta(object):
