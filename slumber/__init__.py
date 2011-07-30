@@ -8,6 +8,7 @@ __url__ = "https://github.com/dstufft/slumber/"
 
 __all__ = ["Resource", "API"]
 
+import copy
 import json # @@@ Should we look for one with speedups?
 import urlparse
 
@@ -15,24 +16,25 @@ from slumber.http import HttpClient
 
 class Resource(object):
 
-    def __init__(self, domain, list_endpoint=None, schema=None):
+    def __init__(self, domain, endpoint=None):
         self.domain = domain
-        self.endpoints = {}
-        self.schema = None
-
-        if list_endpoint is not None:
-            self.endpoints["list"] = list_endpoint
-        if schema is not None:
-            self.endpoints["schema"] = schema
+        self.endpoint = endpoint
 
         self.http_client = HttpClient()
 
-        self.discover_schema()
+    def __call__(self, id):
+        obj = copy.deepcopy(self)
+        obj.object_id = id
+        return obj
+    
+    def get(self, **kwargs):
+        url = urlparse.urljoin(self.domain, self.endpoint)
 
-    def discover_schema(self):
-        if self.endpoints.has_key("schema"):
-            resp, content = self.http_client.get(self.domain + self.endpoints["schema"])
-            self.schema = json.loads(content)
+        if hasattr(self, "object_id"):
+            url = urlparse.urljoin(url, str(self.object_id))
+        
+        resp, content = self.http_client.get(url)
+        return json.loads(content)
 
 
 class APIMeta(object):
@@ -115,10 +117,8 @@ class API(object):
 
         resources = json.loads(content)
         for name, resource in resources.iteritems():
-            kwargs = dict(
-                [x for x in resource.items() if x[0] in ["list_endpoint", "schema"]]
-            )
-            kwargs.update({
+            kwargs = {
                 "domain": self._meta.base_url,
-            })
+                "endpoint": resource.get("list_endpoint", self._meta.http["path"] + name + "/")
+            }
             self._meta.resources[name] = Resource(**kwargs)
