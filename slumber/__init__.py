@@ -18,6 +18,7 @@ import urlparse
 from slumber import exceptions
 from slumber.http import HttpClient
 
+
 class Resource(object):
 
     def __init__(self, domain, endpoint=None):
@@ -32,7 +33,7 @@ class Resource(object):
         return obj
 
     def _request(self, method, **kwargs):
-        if kwargs.has_key("url"):
+        if "url" in kwargs:
             url = kwargs.pop("url")
         else:
             url = urlparse.urljoin(self.domain, self.endpoint)
@@ -43,7 +44,7 @@ class Resource(object):
             if not url.endswith("/"):
                 url += "/"
 
-        if kwargs.has_key("body"):
+        if "body" in kwargs:
             body = kwargs.pop("body")
         else:
             body = None
@@ -59,7 +60,7 @@ class Resource(object):
             raise exceptions.SlumberHttpServerError("Server Error %s: %s" % (resp.status, url), response=resp, content=content)
 
         return resp, content
-    
+
     def get(self, **kwargs):
         resp, content = self._request("GET", **kwargs)
         if 200 <= resp.status <= 299:
@@ -68,7 +69,7 @@ class Resource(object):
             else:
                 return content
         else:
-            return # @@@ We should probably do some sort of error here? (Is this even possible?)
+            return  # @@@ We should probably do some sort of error here? (Is this even possible?)
 
     def post(self, data, **kwargs):
         kwargs.update({
@@ -93,7 +94,7 @@ class Resource(object):
             if resp.status == 204:
                 return True
             else:
-                return True # @@@ Should this really be True?
+                return True  # @@@ Should this really be True?
         else:
             return False
 
@@ -103,7 +104,7 @@ class Resource(object):
             if resp.status == 204:
                 return True
             else:
-                return True # @@@ Should this really be True?
+                return True  # @@@ Should this really be True?
         else:
             return False
 
@@ -125,7 +126,7 @@ class APIMeta(object):
     def __init__(self, **kwargs):
         for key, value in kwargs.iteritems():
             default_value = getattr(self, key)
-            
+
             if isinstance(default_value, dict) and isinstance(value, dict):
                 setattr(self, key, default_value.update(value))
             else:
