@@ -78,7 +78,7 @@ class Resource(object):
         resp, content = self._request("POST", **kwargs)
         if 200 <= resp.status <= 299:
             if resp.status == 201:
-                return self.get(url=resp.location)
+                return self.get(url=resp["location"])
             else:
                 return content
         else:
