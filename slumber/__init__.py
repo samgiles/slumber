@@ -183,7 +183,7 @@ class API(object):
         try:
             return self._meta.resources[item]
         except KeyError:
-            self._meta.resources[item] = Resource(self._meta.base_url)
+            self._meta.resources[item] = Resource(self._meta.base_url, endpoint=urlparse.urljoin(self._meta.http["path"], item))
             return self._meta.resources[item]
 
     def discover_resources(self):
