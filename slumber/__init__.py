@@ -9,21 +9,21 @@ __url__ = "https://github.com/dstufft/slumber/"
 __all__ = ["Resource", "API"]
 
 import copy
-# @@@ Should we look for one with speedups?
-# @@@ Python 2.5 Compatibility?
-import json
 import urllib
 import urlparse
 
 from slumber import exceptions
 from slumber.http import HttpClient
+from slumber.serialize import Serializer
 
 
 class Resource(object):
 
-    def __init__(self, domain, endpoint=None):
+    def __init__(self, domain, endpoint=None, default_format="json"):
         self.domain = domain
         self.endpoint = endpoint
+
+        self.default_format = default_format
 
         self.http_client = HttpClient()
 
@@ -32,7 +32,18 @@ class Resource(object):
         obj.object_id = id
         return obj
 
+    def get_serializer(self, name=None):
+        if name is None:
+            name = self.default_format
+        return Serializer(default_format=name)
+
     def _request(self, method, **kwargs):
+        if "format" in kwargs:
+            fmt = kwargs.pop("format")
+        else:
+            fmt = self.default_format
+        s = self.get_serializer(fmt)
+
         if "url" in kwargs:
             url = kwargs.pop("url")
         else:
@@ -52,7 +63,7 @@ class Resource(object):
         if kwargs:
             url = "?".join([url, urllib.urlencode(kwargs)])
 
-        resp, content = self.http_client.request(url, method, body=body, headers={"content-type": "application/json"})
+        resp, content = self.http_client.request(url, method, body=body, headers={"content-type": s.get_content_type()})
 
         if 400 <= resp.status <= 499:
             raise exceptions.SlumberHttpClientError("Client Error %s: %s" % (resp.status, url), response=resp, content=content)
@@ -62,23 +73,27 @@ class Resource(object):
         return resp, content
 
     def get(self, **kwargs):
+        s = self.get_serializer(kwargs.get("format"))
+
         resp, content = self._request("GET", **kwargs)
         if 200 <= resp.status <= 299:
             if resp.status == 200:
-                return json.loads(content)
+                return s.loads(content)
             else:
                 return content
         else:
             return  # @@@ We should probably do some sort of error here? (Is this even possible?)
 
     def post(self, data, **kwargs):
+        s = self.get_serializer(kwargs.get("format"))
+
         kwargs.update({
-            "body": json.dumps(data)
+            "body": s.dumps(data)
         })
         resp, content = self._request("POST", **kwargs)
         if 200 <= resp.status <= 299:
             if resp.status == 201:
-                return self.get(url=resp["location"])
+                return self.get(url=resp["location"], format=kwargs.get("format"))
             else:
                 return content
         else:
@@ -86,8 +101,10 @@ class Resource(object):
             return
 
     def put(self, data, **kwargs):
+        s = self.get_serializer(kwargs.get("format"))
+
         kwargs.update({
-            "body": json.dumps(data)
+            "body": s.dumps(data)
         })
         resp, content = self._request("PUT", **kwargs)
         if 200 <= resp.status <= 299:
@@ -122,6 +139,7 @@ class APIMeta(object):
         "query": "",
         "fragment": "",
     }
+    default_format = "json"
 
     def __init__(self, **kwargs):
         for key, value in kwargs.iteritems():
@@ -157,7 +175,7 @@ class API(object):
     class Meta:
         pass
 
-    def __init__(self, api_url=None):
+    def __init__(self, api_url=None, default_format=None):
         class_meta = getattr(self, "Meta", None)
         if class_meta is not None:
             keys = [x for x in dir(class_meta) if not x.startswith("_")]
@@ -175,11 +193,18 @@ class API(object):
                 if val:
                     self._meta.http[key] = val
 
+        if default_format is not None:
+            self._meta.default_format = default_format
+
         self.http_client = HttpClient()
 
     def __getattr__(self, item):
         try:
             return self._meta.resources[item]
         except KeyError:
-            self._meta.resources[item] = Resource(self._meta.base_url, endpoint=urlparse.urljoin(self._meta.http["path"], item) + "/")
+            self._meta.resources[item] = Resource(
+                self._meta.base_url,
+                endpoint=urlparse.urljoin(self._meta.http["path"], item) + "/",
+                default_format=self._meta.default_format
+            )
             return self._meta.resources[item]
