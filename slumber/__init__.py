@@ -157,7 +157,7 @@ class API(object):
     class Meta:
         pass
 
-    def __init__(self, api_url=None, discover_resources=False):
+    def __init__(self, api_url=None):
         class_meta = getattr(self, "Meta", None)
         if class_meta is not None:
             keys = [x for x in dir(class_meta) if not x.startswith("_")]
@@ -177,23 +177,9 @@ class API(object):
 
         self.http_client = HttpClient()
 
-        if discover_resources:
-            self.discover_resources()
-
     def __getattr__(self, item):
         try:
             return self._meta.resources[item]
         except KeyError:
-            self._meta.resources[item] = Resource(self._meta.base_url, endpoint=urlparse.urljoin(self._meta.http["path"], item))
+            self._meta.resources[item] = Resource(self._meta.base_url, endpoint=urlparse.urljoin(self._meta.http["path"], item) + "/")
             return self._meta.resources[item]
-
-    def discover_resources(self):
-        resp, content = self.http_client.get(self._meta.api_url)
-
-        resources = json.loads(content)
-        for name, resource in resources.iteritems():
-            kwargs = {
-                "domain": self._meta.base_url,
-                "endpoint": resource.get("list_endpoint", self._meta.http["path"] + name + "/")
-            }
-            self._meta.resources[name] = Resource(**kwargs)
