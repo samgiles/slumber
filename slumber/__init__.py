@@ -19,13 +19,17 @@ from slumber.serialize import Serializer
 
 class Resource(object):
 
-    def __init__(self, domain, endpoint=None, default_format="json"):
+    def __init__(self, domain, endpoint=None, default_format="json", authentication=None):
         self.domain = domain
         self.endpoint = endpoint
+        self.authentication = authentication
 
         self.default_format = default_format
 
         self.http_client = HttpClient()
+
+        if self.authentication is not None:
+            self.http_client.add_credentials(**self.authentication)
 
     def __call__(self, id):
         obj = copy.deepcopy(self)
@@ -129,6 +133,8 @@ class Resource(object):
 class APIMeta(object):
 
     resources = {}
+    default_format = "json"
+
     http = {
         "schema": "http",
         "hostname": None,
@@ -139,7 +145,8 @@ class APIMeta(object):
         "query": "",
         "fragment": "",
     }
-    default_format = "json"
+
+    authentication = None
 
     def __init__(self, **kwargs):
         for key, value in kwargs.iteritems():
@@ -175,7 +182,7 @@ class API(object):
     class Meta:
         pass
 
-    def __init__(self, api_url=None, default_format=None):
+    def __init__(self, api_url=None, default_format=None, authentication=None):
         class_meta = getattr(self, "Meta", None)
         if class_meta is not None:
             keys = [x for x in dir(class_meta) if not x.startswith("_")]
@@ -196,7 +203,13 @@ class API(object):
         if default_format is not None:
             self._meta.default_format = default_format
 
+        if authentication is not None:
+            self._meta.authentication = authentication
+
         self.http_client = HttpClient()
+
+        if self._meta.authentication is not None:
+            self.http_client.add_credentials(**self._meta.authentication)
 
     def __getattr__(self, item):
         try:
@@ -205,6 +218,7 @@ class API(object):
             self._meta.resources[item] = Resource(
                 self._meta.base_url,
                 endpoint=urlparse.urljoin(self._meta.http["path"], item) + "/",
-                default_format=self._meta.default_format
+                default_format=self._meta.default_format,
+                authentication=self._meta.authentication
             )
             return self._meta.resources[item]
