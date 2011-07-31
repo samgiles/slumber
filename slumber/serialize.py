@@ -1,3 +1,5 @@
+from slumber import exceptions
+
 SERIALIZERS = {
     "json": True,
     "yaml": True,
@@ -16,7 +18,8 @@ try:
 except ImportError:
     SERIALIZERS["yaml"] = False
 
-# @@@ Check for No Available Serializers
+if not len([x for x in SERIALIZERS.values() if x]):
+    raise exceptions.SlumberSerializerNoAvailable("There are no Available Serializers.")
 
 
 class BaseSerializer(object):
@@ -75,7 +78,7 @@ class Serializer(object):
             return self.default_format
         else:
             if not name in self.available_serializers:
-                pass  # @@@ Raise Exception about Format not being in the available List
+                raise exceptions.SlumberSerializerNotAvailable("%s is not an available serializer" % name)
             return self._serializers[name]
 
     def loads(self, data, format=None):

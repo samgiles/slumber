@@ -25,3 +25,15 @@ class SlumberHttpServerError(SlumberHttpBaseException):
     """
     Called when the server tells us there was a server error (5xx).
     """
+
+
+class SlumberSerializerNoAvailable(SlumberBaseException):
+    """
+    There are no available Serializers.
+    """
+
+
+class SlumberSerializerNotAvailable(SlumberBaseException):
+    """
+    The chosen Serializer is not available.
+    """
