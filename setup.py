@@ -1,5 +1,5 @@
 from setuptools import setup, find_packages
-import slumber
+from slumber import __version__, __description__, __url__, __author__, __email__
 import sys
 
 install_requires = ["httplib2"]
@@ -10,11 +10,11 @@ if sys.version_info < (2, 6):
 
 setup(
     name = "slumber",
-    version = slumber.__version__,
-    description = slumber.__description__,
-    url = slumber.__url__,
-    author = slumber.__author__,
-    author_email = slumber.__email__,
+    version = __version__,
+    description = __description__,
+    url = __url__,
+    author = __author__,
+    author_email = __email__,
     packages = find_packages(),
     zip_safe = False,
     install_requires = install_requires,
