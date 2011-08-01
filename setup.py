@@ -1,5 +1,4 @@
 from setuptools import setup, find_packages
-from slumber import __version__, __description__, __url__, __author__, __email__
 import sys
 
 install_requires = ["httplib2"]
@@ -7,14 +6,14 @@ install_requires = ["httplib2"]
 if sys.version_info < (2, 6):
     install_requires.append("simplejson")
 
-
 setup(
     name = "slumber",
-    version = __version__,
-    description = __description__,
-    url = __url__,
-    author = __author__,
-    author_email = __email__,
+    version = "0.1.1",
+    description = "A library that makes consuming a ReST API easier and more convenient",
+    long_description=open("README.rst", "r").read(),
+    url = "http://slumber.in/",
+    author = "Donald Stufft",
+    author_email = "donald.stufft@gmail.com",
     packages = find_packages(),
     zip_safe = False,
     install_requires = install_requires,

@@ -1,13 +1,3 @@
-__version__ = "0.1"
-
-__author__ = "Donald Stufft"
-__email__ = "donald.stufft@gmail.com"
-
-__description__ = "A library that makes consuming a ReST API easier and more convenient"
-__url__ = "https://github.com/dstufft/slumber/"
-
-__all__ = ["Resource", "API"]
-
 import copy
 import urllib
 import urlparse
@@ -15,6 +5,8 @@ import urlparse
 from slumber import exceptions
 from slumber.http import HttpClient
 from slumber.serialize import Serializer
+
+__all__ = ["Resource", "API"]
 
 
 class Resource(object):
