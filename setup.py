@@ -10,7 +10,7 @@ setup(
     name = "slumber",
     version = "0.2.2",
     description = "A library that makes consuming a ReST API easier and more convenient",
-    long_description="\n".join([
+    long_description="\n\n".join([
         open("README.rst", "r").read(),
         open("CHANGELOG.rst", "r").read()
     ]),
