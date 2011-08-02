@@ -85,13 +85,9 @@ class Resource(object):
     def post(self, data, **kwargs):
         s = self.get_serializer()
 
-        kwargs.update({
-            "body": s.dumps(data)
-        })
-        resp, content = self._request("POST", **kwargs)
+        resp, content = self._request("POST", body=s.dumps(data), **kwargs)
         if 200 <= resp.status <= 299:
             if resp.status == 201:
-                kwargs.pop("body")
                 return self.get(url=resp["location"], **kwargs)
             else:
                 return content
@@ -102,10 +98,7 @@ class Resource(object):
     def put(self, data, **kwargs):
         s = self.get_serializer()
 
-        kwargs.update({
-            "body": s.dumps(data)
-        })
-        resp, content = self._request("PUT", **kwargs)
+        resp, content = self._request("PUT", body=s.dumps(data), **kwargs)
         if 200 <= resp.status <= 299:
             if resp.status == 204:
                 return True
