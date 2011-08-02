@@ -22,13 +22,18 @@ class Resource(object):
         if self.authentication is not None:
             self.http_client.add_credentials(**self.authentication)
 
-    def __call__(self, id=None, format=None):
-        if id is not None or format is not None:
+    def __call__(self, id=None, format=None, url_override=None):
+        if id is not None or format is not None or url_override is not None:
             obj = copy.deepcopy(self)
             if id is not None:
                 obj.object_id = id
             if format is not None:
                 obj.format = format
+            if url_override is not None:
+                # @@@ This is hacky. Should probably Figure out a Better Way
+                #       can't just pass it to get/post/put/delete because
+                #       it'll override the kwarg -> url paramter.
+                obj.url_override = url_override
             return obj
         return self
 
@@ -42,8 +47,8 @@ class Resource(object):
     def _request(self, method, **kwargs):
         s = self.get_serializer()
 
-        if "url" in kwargs:
-            url = kwargs.pop("url")
+        if hasattr(self, "url_override"):
+            url = self.url_override
         else:
             url = urlparse.urljoin(self.domain, self.endpoint)
 
@@ -88,7 +93,9 @@ class Resource(object):
         resp, content = self._request("POST", body=s.dumps(data), **kwargs)
         if 200 <= resp.status <= 299:
             if resp.status == 201:
-                return self.get(url=resp["location"], **kwargs)
+                # @@@ Hacky, see description in __call__
+                resource_obj = self(url_override=resp["location"])
+                return resource_obj.get(**kwargs)
             else:
                 return content
         else:
