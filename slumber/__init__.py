@@ -11,7 +11,7 @@ __all__ = ["Resource", "API"]
 
 class Resource(object):
 
-    def __init__(self, domain, endpoint=None, format="json", authentication=None):
+    def __init__(self, domain, endpoint, format="json", authentication=None):
         self.domain = domain
         self.endpoint = endpoint
         self.authentication = authentication
