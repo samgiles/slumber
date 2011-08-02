@@ -92,7 +92,7 @@ class Resource(object):
         if 200 <= resp.status <= 299:
             if resp.status == 201:
                 kwargs.pop("body")
-                return self.get(url=resp["location"], format=kwargs.get("format"), **kwargs)
+                return self.get(url=resp["location"], **kwargs)
             else:
                 return content
         else:
