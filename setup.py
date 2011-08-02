@@ -10,7 +10,7 @@ setup(
     name = "slumber",
     version = "0.2",
     description = "A library that makes consuming a ReST API easier and more convenient",
-    long_description=open("README.rst", "r").read() + open("CHANGELOG.rst", "r"),
+    long_description=open("README.rst", "r").read() + open("CHANGELOG.rst", "r").read(),
     url = "http://slumber.in/",
     author = "Donald Stufft",
     author_email = "donald.stufft@gmail.com",
