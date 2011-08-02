@@ -39,4 +39,4 @@ If you want to override the serializer for a particular request, you can do that
 
     # Use Yaml instead of Json for just this request.
     api = slumber.API("http://path/to/my/api/") # Serializer defaults to Json
-    api.resource_name.get(format="yaml") # Serializer will be Yaml
+    api.resource_name(format="yaml").get() # Serializer will be Yaml
