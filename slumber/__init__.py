@@ -11,34 +11,36 @@ __all__ = ["Resource", "API"]
 
 class Resource(object):
 
-    def __init__(self, domain, endpoint=None, default_format="json", authentication=None):
+    def __init__(self, domain, endpoint=None, format="json", authentication=None):
         self.domain = domain
         self.endpoint = endpoint
         self.authentication = authentication
-
-        self.default_format = default_format
+        self.format = format
 
         self.http_client = HttpClient()
 
         if self.authentication is not None:
             self.http_client.add_credentials(**self.authentication)
 
-    def __call__(self, id):
-        obj = copy.deepcopy(self)
-        obj.object_id = id
-        return obj
+    def __call__(self, id=None, format=None):
+        if id is not None or format is not None:
+            obj = copy.deepcopy(self)
+            if id is not None:
+                obj.object_id = id
+            if format is not None:
+                obj.format = format
+            return obj
+        return self
 
-    def get_serializer(self, name=None):
-        if name is None:
-            name = self.default_format
-        return Serializer(default_format=name)
+    def get_serializer(self):
+        try:
+            return self._serializer
+        except AttributeError:
+            self._serializer = Serializer(default_format=self.format)
+            return self._serializer
 
     def _request(self, method, **kwargs):
-        if "format" in kwargs:
-            fmt = kwargs.pop("format")
-        else:
-            fmt = self.default_format
-        s = self.get_serializer(fmt)
+        s = self.get_serializer()
 
         if "url" in kwargs:
             url = kwargs.pop("url")
@@ -69,7 +71,7 @@ class Resource(object):
         return resp, content
 
     def get(self, **kwargs):
-        s = self.get_serializer(kwargs.get("format"))
+        s = self.get_serializer()
 
         resp, content = self._request("GET", **kwargs)
         if 200 <= resp.status <= 299:
@@ -81,7 +83,7 @@ class Resource(object):
             return  # @@@ We should probably do some sort of error here? (Is this even possible?)
 
     def post(self, data, **kwargs):
-        s = self.get_serializer(kwargs.get("format"))
+        s = self.get_serializer()
 
         kwargs.update({
             "body": s.dumps(data)
@@ -98,7 +100,7 @@ class Resource(object):
             return
 
     def put(self, data, **kwargs):
-        s = self.get_serializer(kwargs.get("format"))
+        s = self.get_serializer()
 
         kwargs.update({
             "body": s.dumps(data)
@@ -211,7 +213,7 @@ class API(object):
             self._meta.resources[item] = Resource(
                 self._meta.base_url,
                 endpoint=urlparse.urljoin(self._meta.http["path"], item) + "/",
-                default_format=self._meta.default_format,
+                format=self._meta.default_format,
                 authentication=self._meta.authentication
             )
             return self._meta.resources[item]
