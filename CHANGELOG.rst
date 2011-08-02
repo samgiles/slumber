@@ -1,8 +1,13 @@
 Changelog
 =========
 
+0.2.3
+-----
+
+* Updated the docs to include a section about url parameters
+
 0.2
----
+----
 
 * *(Backwards Incompatible)* Move specifying a non default serializer from
   ``api.resource.get(format="yaml")`` to ``api.resource(format="yaml").get()``
