@@ -89,7 +89,8 @@ class Resource(object):
         resp, content = self._request("POST", **kwargs)
         if 200 <= resp.status <= 299:
             if resp.status == 201:
-                return self.get(url=resp["location"], format=kwargs.get("format"))
+                kwargs.pop("body")
+                return self.get(url=resp["location"], format=kwargs.get("format"), **kwargs)
             else:
                 return content
         else:
