@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.2.4
+-----
+
+* Fixed Including of Changelog.rst
+
 0.2.3
 -----
 
