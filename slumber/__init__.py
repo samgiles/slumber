@@ -62,18 +62,17 @@ class ResourceAttributesMixin(object):
     A Mixin that makes it so that accessing an undefined attribute on a class
     results in returning a Resource Instance. This Instance can then be used
     to make calls to the a Resource.
+
+    It assumes that a Meta class exists at self._meta with all the required
+    attributes.
     """
 
     def __getattr__(self, item):
-        try:
-            return self._meta.resources[item]
-        except KeyError:
-            self._meta.resources[item] = Resource(
-                base_url=urlparse.urljoin(self._meta.base_url, item),
-                format=self._meta.default_format,
-                authentication=self._meta.authentication
-            )
-            return self._meta.resources[item]
+        return Resource(
+            base_url=urlparse.urljoin(self._meta.base_url, item),
+            format=self._meta.default_format,
+            authentication=self._meta.authentication
+        )
 
 
 class Resource(MetaMixin, object):
@@ -219,8 +218,6 @@ class Resource(MetaMixin, object):
 class API(ResourceAttributesMixin, MetaMixin, object):
 
     class Meta:
-        resources = {}
-
         default_format = "json"
         authentication = None
 
