@@ -1,4 +1,5 @@
 import copy
+import posixpath
 import urllib
 import urlparse
 
@@ -7,6 +8,15 @@ from slumber.http import HttpClient
 from slumber.serialize import Serializer
 
 __all__ = ["Resource", "API"]
+
+
+def url_join(base, *args):
+    """
+    Helper function to join an arbitrary number of url segments together.
+    """
+    scheme, netloc, path, query, fragment = urlparse.urlsplit(base)
+    path = posixpath.join(path, *[str(x) for x in args])
+    return urlparse.urlunsplit([scheme, netloc, path, query, fragment])
 
 
 class Meta(object):
@@ -47,38 +57,63 @@ class MetaMixin(object):
         super(MetaMixin, self).__init__(*args, **kwargs)
 
 
-class Resource(object):
+class Resource(MetaMixin, object):
+    """
+    Resource provides the main functionality behind slumber. It handles the
+    attribute -> url, kwarg -> query param, and other related behind the scenes
+    python to HTTP transformations. It's goal is to represent a single resource
+    which may or may not have children.
 
-    def __init__(self, base_url, format="json", authentication=None):
-        self.base_url = base_url
-        self.authentication = authentication
-        self.format = format
+    It assumes that a Meta class exists at self._meta with all the required
+    attributes.
+    """
+
+    class Meta:
+        authentication = None
+        base_url = None
+        format = "json"
+
+    def __init__(self, *args, **kwargs):
+        super(Resource, self).__init__(*args, **kwargs)
 
         self.http_client = HttpClient()
 
-        if self.authentication is not None:
-            self.http_client.add_credentials(**self.authentication)
+        if self._meta.authentication is not None:
+            self.http_client.add_credentials(**self._meta.authentication)
 
-    def __call__(self, id=None, format=None, url_override=None):
-        if id is not None or format is not None or url_override is not None:
-            obj = copy.deepcopy(self)
-            if id is not None:
-                obj.object_id = id
-            if format is not None:
-                obj.format = format
-            if url_override is not None:
-                # @@@ This is hacky. Should probably Figure out a Better Way
-                #       can't just pass it to get/post/put/delete because
-                #       it'll override the kwarg -> url paramter.
-                obj.url_override = url_override
-            return obj
-        return self
+    def __call__(self, id=None, format=None, url_overide=None):
+        """
+        Returns a new instance of self modified by one or more of the available
+        parameters. These allows us to do things like override format for a
+        specific request, and enables the api.resource(ID).get() syntax to get
+        a specific resource by it's ID.
+        """
+
+        # Short Circuit out if the call is empty
+        if id is None and format is None and url_overide is None:
+            return self
+
+        obj = copy.deepcopy(self)
+
+        if id is not None:
+            obj.object_id = id
+
+        if format is not None:
+            obj._meta.format = format
+
+        if url_overide is not None:
+            # @@@ This is hacky and we should probably figure out a better way
+            #    of handling the case when a POST/PUT doesn't return an object
+            #    but a Location to an object that we need to GET.
+            obj.url_overide = url_overide
+        
+        return obj
 
     def get_serializer(self):
         try:
             return self._serializer
         except AttributeError:
-            self._serializer = Serializer(default_format=self.format)
+            self._serializer = Serializer(default_format=self._meta.format)
             return self._serializer
 
     def _request(self, method, **kwargs):
@@ -87,10 +122,13 @@ class Resource(object):
         if hasattr(self, "url_override"):
             url = self.url_override
         else:
-            url = self.base_url
+            url = self._meta.base_url
+
+            print url
 
             if hasattr(self, "object_id"):
-                url = urlparse.urljoin(url, str(self.object_id))
+                url = url_join(url, self.object_id)
+                print url
 
         if "body" in kwargs:
             body = kwargs.pop("body")
@@ -189,7 +227,7 @@ class API(MetaMixin, object):
             return self._meta.resources[item]
         except KeyError:
             self._meta.resources[item] = Resource(
-                urlparse.urljoin(self._meta.base_url, item),
+                base_url=urlparse.urljoin(self._meta.base_url, item),
                 format=self._meta.default_format,
                 authentication=self._meta.authentication
             )
