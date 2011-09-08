@@ -13,6 +13,7 @@ and processing requests.
 
    tutorial
    options
+   howitworks
 
 Getting Help
 ============
@@ -41,8 +42,7 @@ QuickStart
 Requirements
 ============
 
-Slumber requires the following modules. If you use Pip_, you can install
-the necessary bits via the included ``requirements.txt``:
+Slumber requires the following modules:
 
 * Python 2.5+
 * httplib2
@@ -50,6 +50,10 @@ the necessary bits via the included ``requirements.txt``:
 * pyyaml (If you are using the optional yaml serialization)
 
 .. _Pip: http://pip.openplans.org/
+
+Testing Slumber requires the following modules:
+
+* Mock
 
 Indices and tables
 ==================
