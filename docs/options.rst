@@ -33,7 +33,7 @@ json. You can change this default by specifying a ``default_format`` argument to
 api class.::
 
     # Use Yaml instead of Json
-    api = slumber.API("http://path/to/my/api/", default_format="yaml")
+    api = slumber.API("http://path/to/my/api/", format="yaml")
 
 If you want to override the serializer for a particular request, you can do that as well::
 
