@@ -152,9 +152,9 @@ class Resource(ResourceAttributesMixin, MetaMixin, object):
         resp, content = self._http_client.request(url, method, body=body, headers={"content-type": s.get_content_type()})
 
         if 400 <= resp.status <= 499:
-            raise exceptions.SlumberHttpClientError("Client Error %s: %s" % (resp.status, url), response=resp, content=content)
+            raise exceptions.HttpClientError("Client Error %s: %s" % (resp.status, url), response=resp, content=content)
         elif 500 <= resp.status <= 599:
-            raise exceptions.SlumberHttpServerError("Server Error %s: %s" % (resp.status, url), response=resp, content=content)
+            raise exceptions.HttpServerError("Server Error %s: %s" % (resp.status, url), response=resp, content=content)
 
         return resp, content
 

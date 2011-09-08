@@ -15,25 +15,25 @@ class SlumberHttpBaseException(SlumberBaseException):
         super(SlumberHttpBaseException, self).__init__(*args)
 
 
-class SlumberHttpClientError(SlumberHttpBaseException):
+class HttpClientError(SlumberHttpBaseException):
     """
     Called when the server tells us there was a client error (4xx).
     """
 
 
-class SlumberHttpServerError(SlumberHttpBaseException):
+class HttpServerError(SlumberHttpBaseException):
     """
     Called when the server tells us there was a server error (5xx).
     """
 
 
-class SlumberSerializerNoAvailable(SlumberBaseException):
+class SerializerNoAvailable(SlumberBaseException):
     """
     There are no available Serializers.
     """
 
 
-class SlumberSerializerNotAvailable(SlumberBaseException):
+class SerializerNotAvailable(SlumberBaseException):
     """
     The chosen Serializer is not available.
     """
