@@ -57,6 +57,25 @@ class MetaMixin(object):
         super(MetaMixin, self).__init__(*args, **kwargs)
 
 
+class ResourceAttributesMixin(object):
+    """
+    A Mixin that makes it so that accessing an undefined attribute on a class
+    results in returning a Resource Instance. This Instance can then be used
+    to make calls to the a Resource.
+    """
+
+    def __getattr__(self, item):
+        try:
+            return self._meta.resources[item]
+        except KeyError:
+            self._meta.resources[item] = Resource(
+                base_url=urlparse.urljoin(self._meta.base_url, item),
+                format=self._meta.default_format,
+                authentication=self._meta.authentication
+            )
+            return self._meta.resources[item]
+
+
 class Resource(MetaMixin, object):
     """
     Resource provides the main functionality behind slumber. It handles the
@@ -197,7 +216,7 @@ class Resource(MetaMixin, object):
             return False
 
 
-class API(MetaMixin, object):
+class API(ResourceAttributesMixin, MetaMixin, object):
 
     class Meta:
         resources = {}
@@ -221,14 +240,3 @@ class API(MetaMixin, object):
 
         if self._meta.authentication is not None:
             self.http_client.add_credentials(**self._meta.authentication)
-
-    def __getattr__(self, item):
-        try:
-            return self._meta.resources[item]
-        except KeyError:
-            self._meta.resources[item] = Resource(
-                base_url=urlparse.urljoin(self._meta.base_url, item),
-                format=self._meta.default_format,
-                authentication=self._meta.authentication
-            )
-            return self._meta.resources[item]
