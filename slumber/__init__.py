@@ -1,4 +1,3 @@
-import copy
 import posixpath
 import urllib
 import urlparse
