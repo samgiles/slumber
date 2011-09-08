@@ -131,9 +131,8 @@ class APIMeta(object):
     default_format = "json"
 
     http = {
-        "schema": "http",
-        "hostname": None,
-        "port": "80",
+        "scheme": "http",
+        "netloc": None,
         "path": "/",
 
         "params": "",
@@ -154,18 +153,18 @@ class APIMeta(object):
 
     @property
     def base_url(self):
-        ORDERING = ["schema", "hostname", "port", "path", "params", "query", "fragment"]
+        ORDERING = ["scheme", "netloc", "path", "params", "query", "fragment"]
         urlparts = []
         for key in ORDERING:
             if key in ["path"]:
                 urlparts.append("")
             else:
                 urlparts.append(self.http[key])
-        return urlparse.urlunparse(urlparts[:1] + [":".join([str(x) for x in urlparts[1:3]])] + urlparts[3:])
+        return urlparse.urlunparse(urlparts)
 
     @property
     def api_url(self):
-        ORDERING = ["schema", "hostname", "port", "path", "params", "query", "fragment"]
+        ORDERING = ["schema", "netloc", "path", "params", "query", "fragment"]
         urlparts = []
         for key in ORDERING:
             urlparts.append(self.http[key])
