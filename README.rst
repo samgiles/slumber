@@ -35,8 +35,7 @@ QuickStart
 Requirements
 ============
 
-Slumber requires the following modules. If you use Pip_, you can install
-the necessary bits via the included ``requirements.txt``:
+Slumber requires the following modules.
 
 * Python 2.5+
 * httplib2
