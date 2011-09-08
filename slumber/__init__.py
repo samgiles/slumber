@@ -94,10 +94,6 @@ class Resource(ResourceAttributesMixin, MetaMixin, object):
         base_url = None
         format = "json"
 
-    def __copy__(self):
-        obj = self.__class__(**self._meta.__dict__)
-        return obj
-
     def __call__(self, id=None, format=None, url_overide=None):
         """
         Returns a new instance of self modified by one or more of the available
