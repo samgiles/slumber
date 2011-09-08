@@ -15,6 +15,7 @@ def url_join(base, *args):
     Helper function to join an arbitrary number of url segments together.
     """
     scheme, netloc, path, query, fragment = urlparse.urlsplit(base)
+    path = path if len(path) else "/"
     path = posixpath.join(path, *[str(x) for x in args])
     return urlparse.urlunsplit([scheme, netloc, path, query, fragment])
 
