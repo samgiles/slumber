@@ -19,7 +19,7 @@ except ImportError:
     SERIALIZERS["yaml"] = False
 
 if not len([x for x in SERIALIZERS.values() if x]):
-    raise exceptions.SlumberSerializerNoAvailable("There are no Available Serializers.")
+    raise exceptions.SerializerNoAvailable("There are no Available Serializers.")
 
 
 class BaseSerializer(object):
@@ -78,7 +78,7 @@ class Serializer(object):
             return self.default_format
         else:
             if not name in self.available_serializers:
-                raise exceptions.SlumberSerializerNotAvailable("%s is not an available serializer" % name)
+                raise exceptions.SerializerNotAvailable("%s is not an available serializer" % name)
             return self._serializers[name]
 
     def loads(self, data, format=None):

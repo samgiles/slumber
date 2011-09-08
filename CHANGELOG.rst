@@ -1,6 +1,17 @@
 Changelog
 =========
 
+0.3.0
+-----
+
+* Allowed nesting resources infinitely to allow more complex api usage.
+* Cleaned up the Meta class and allow subclassing ``slumber.API``
+* *(Backwards Incompatible)* Cleaned up the exception names.
+* *(Backwards Incompatible)* Renamed the ``slumber.API`` serialization kwarg from
+  default_format to format to be more consistent
+* Improved the documentation
+* Added Some Tests (This could still be better)
+
 0.2.5
 -----
 

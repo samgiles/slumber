@@ -1,3 +1,4 @@
+import os.path
 from setuptools import setup, find_packages
 import sys
 
@@ -6,13 +7,15 @@ install_requires = ["httplib2"]
 if sys.version_info < (2, 6):
     install_requires.append("simplejson")
 
+base_dir = os.path.dirname(os.path.abspath(__file__))
+
 setup(
     name = "slumber",
-    version = "0.2.5",
-    description = "A library that makes consuming a ReST API easier and more convenient",
+    version = "0.3.0",
+    description = "A library that makes consuming a REST API easier and more convenient",
     long_description="\n\n".join([
-        open("README.rst", "r").read(),
-        open("CHANGELOG.rst", "r").read()
+        open(os.path.join(base_dir, "README.rst"), "r").read(),
+        open(os.path.join(base_dir, "CHANGELOG.rst"), "r").read()
     ]),
     url = "http://slumber.in/",
     author = "Donald Stufft",
@@ -20,4 +23,5 @@ setup(
     packages = find_packages(),
     zip_safe = False,
     install_requires = install_requires,
+    test_suite = "tests.get_tests",
 )
