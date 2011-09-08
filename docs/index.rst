@@ -13,6 +13,7 @@ and processing requests.
 
    tutorial
    options
+   howitworks
 
 Getting Help
 ============
