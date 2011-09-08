@@ -8,7 +8,7 @@ if sys.version_info < (2, 6):
 
 setup(
     name = "slumber",
-    version = "0.2.4",
+    version = "0.2.5",
     description = "A library that makes consuming a ReST API easier and more convenient",
     long_description="\n\n".join([
         open("README.rst", "r").read(),
