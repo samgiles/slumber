@@ -23,4 +23,5 @@ setup(
     packages = find_packages(),
     zip_safe = False,
     install_requires = install_requires,
+    test_suite = "tests.get_tests",
 )

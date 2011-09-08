@@ -15,6 +15,7 @@ def url_join(base, *args):
     Helper function to join an arbitrary number of url segments together.
     """
     scheme, netloc, path, query, fragment = urlparse.urlsplit(base)
+    path = path if len(path) else "/"
     path = posixpath.join(path, *[str(x) for x in args])
     return urlparse.urlunsplit([scheme, netloc, path, query, fragment])
 
@@ -94,6 +95,14 @@ class Resource(ResourceAttributesMixin, MetaMixin, object):
         base_url = None
         format = "json"
 
+    def __init__(self, *args, **kwargs):
+        super(Resource, self).__init__(*args, **kwargs)
+
+        self._http = httplib2.Http()
+
+        if self._meta.authentication is not None:
+            self._http.add_credentials(**self._meta.authentication)
+
     def __call__(self, id=None, format=None, url_overide=None):
         """
         Returns a new instance of self modified by one or more of the available
@@ -137,12 +146,7 @@ class Resource(ResourceAttributesMixin, MetaMixin, object):
         if kwargs:
             url = "?".join([url, urllib.urlencode(kwargs)])
 
-        h = httplib2.Http()
-
-        if self._meta.authentication is not None:
-            h.add_credentials(**self._meta.authentication)
-
-        resp, content = h.request(url, method, body=body, headers={"content-type": s.get_content_type()})
+        resp, content = self._http.request(url, method, body=body, headers={"content-type": s.get_content_type()})
 
         if 400 <= resp.status <= 499:
             raise exceptions.HttpClientError("Client Error %s: %s" % (resp.status, url), response=resp, content=content)
