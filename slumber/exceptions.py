@@ -37,3 +37,9 @@ class SlumberSerializerNotAvailable(SlumberBaseException):
     """
     The chosen Serializer is not available.
     """
+
+
+class ImproperlyConfigured(SlumberBaseException):
+    """
+    Slumber is somehow improperly configured.
+    """
