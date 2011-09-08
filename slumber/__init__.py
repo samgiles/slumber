@@ -169,8 +169,15 @@ class API(MetaMixin, object):
 
         base_url = None
 
-    def __init__(self, base_url, **kwargs):
-        super(API, self).__init__(base_url=base_url, **kwargs)
+    def __init__(self, base_url=None, **kwargs):
+        if base_url is not None:
+            kwargs.update({"base_url": base_url})
+            
+        super(API, self).__init__(**kwargs)
+
+        # Do some Checks for Required Values
+        if self._meta.base_url is None:
+            raise exceptions.ImproperlyConfigured("base_url is required")
 
         self.http_client = HttpClient()
 
