@@ -12,7 +12,7 @@ base_dir = os.path.dirname(os.path.abspath(__file__))
 setup(
     name = "slumber",
     version = "0.2.5",
-    description = "A library that makes consuming a ReST API easier and more convenient",
+    description = "A library that makes consuming a REST API easier and more convenient",
     long_description="\n\n".join([
         open(os.path.join(base_dir, "README.rst"), "r").read(),
         open(os.path.join(base_dir, "CHANGELOG.rst"), "r").read()
