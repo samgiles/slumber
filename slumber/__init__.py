@@ -68,14 +68,17 @@ class ResourceAttributesMixin(object):
     """
 
     def __getattr__(self, item):
+        if item.startswith("_"):
+            raise AttributeError(item)
+
         return Resource(
-            base_url=urlparse.urljoin(self._meta.base_url, item),
-            format=self._meta.default_format,
+            base_url=url_join(self._meta.base_url, item),
+            format=self._meta.format,
             authentication=self._meta.authentication
         )
 
 
-class Resource(MetaMixin, object):
+class Resource(ResourceAttributesMixin, MetaMixin, object):
     """
     Resource provides the main functionality behind slumber. It handles the
     attribute -> url, kwarg -> query param, and other related behind the scenes
@@ -94,10 +97,14 @@ class Resource(MetaMixin, object):
     def __init__(self, *args, **kwargs):
         super(Resource, self).__init__(*args, **kwargs)
 
-        self.http_client = HttpClient()
+        self._http_client = HttpClient()
 
         if self._meta.authentication is not None:
-            self.http_client.add_credentials(**self._meta.authentication)
+            self._http_client.add_credentials(**self._meta.authentication)
+
+    def __copy__(self):
+        obj = self.__class__(**self._meta.__dict__)
+        return obj
 
     def __call__(self, id=None, format=None, url_overide=None):
         """
@@ -111,42 +118,28 @@ class Resource(MetaMixin, object):
         if id is None and format is None and url_overide is None:
             return self
 
-        obj = copy.deepcopy(self)
+        kwargs = dict([x for x in self._meta.__dict__.items() if not x[0].startswith("_")])
 
         if id is not None:
-            obj.object_id = id
+            kwargs["base_url"] = url_join(self._meta.base_url, id)
 
         if format is not None:
-            obj._meta.format = format
+            kwargs["format"] = format
 
         if url_overide is not None:
             # @@@ This is hacky and we should probably figure out a better way
             #    of handling the case when a POST/PUT doesn't return an object
             #    but a Location to an object that we need to GET.
-            obj.url_overide = url_overide
+            kwargs["base_url"] = url_overide
         
-        return obj
+        return self.__class__(**kwargs)
 
     def get_serializer(self):
-        try:
-            return self._serializer
-        except AttributeError:
-            self._serializer = Serializer(default_format=self._meta.format)
-            return self._serializer
+        return Serializer(default_format=self._meta.format)
 
     def _request(self, method, **kwargs):
         s = self.get_serializer()
-
-        if hasattr(self, "url_override"):
-            url = self.url_override
-        else:
-            url = self._meta.base_url
-
-            print url
-
-            if hasattr(self, "object_id"):
-                url = url_join(url, self.object_id)
-                print url
+        url = self._meta.base_url
 
         if "body" in kwargs:
             body = kwargs.pop("body")
@@ -156,7 +149,7 @@ class Resource(MetaMixin, object):
         if kwargs:
             url = "?".join([url, urllib.urlencode(kwargs)])
 
-        resp, content = self.http_client.request(url, method, body=body, headers={"content-type": s.get_content_type()})
+        resp, content = self._http_client.request(url, method, body=body, headers={"content-type": s.get_content_type()})
 
         if 400 <= resp.status <= 499:
             raise exceptions.SlumberHttpClientError("Client Error %s: %s" % (resp.status, url), response=resp, content=content)
@@ -218,7 +211,7 @@ class Resource(MetaMixin, object):
 class API(ResourceAttributesMixin, MetaMixin, object):
 
     class Meta:
-        default_format = "json"
+        format = "json"
         authentication = None
 
         base_url = None
