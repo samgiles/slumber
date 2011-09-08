@@ -3,8 +3,9 @@ import posixpath
 import urllib
 import urlparse
 
+import httplib2
+
 from slumber import exceptions
-from slumber.http import HttpClient
 from slumber.serialize import Serializer
 
 __all__ = ["Resource", "API"]
@@ -94,14 +95,6 @@ class Resource(ResourceAttributesMixin, MetaMixin, object):
         base_url = None
         format = "json"
 
-    def __init__(self, *args, **kwargs):
-        super(Resource, self).__init__(*args, **kwargs)
-
-        self._http_client = HttpClient()
-
-        if self._meta.authentication is not None:
-            self._http_client.add_credentials(**self._meta.authentication)
-
     def __copy__(self):
         obj = self.__class__(**self._meta.__dict__)
         return obj
@@ -149,7 +142,12 @@ class Resource(ResourceAttributesMixin, MetaMixin, object):
         if kwargs:
             url = "?".join([url, urllib.urlencode(kwargs)])
 
-        resp, content = self._http_client.request(url, method, body=body, headers={"content-type": s.get_content_type()})
+        h = httplib2.Http()
+
+        if self._meta.authentication is not None:
+            h.add_credentials(**self._meta.authentication)
+
+        resp, content = h.request(url, method, body=body, headers={"content-type": s.get_content_type()})
 
         if 400 <= resp.status <= 499:
             raise exceptions.HttpClientError("Client Error %s: %s" % (resp.status, url), response=resp, content=content)
@@ -225,8 +223,3 @@ class API(ResourceAttributesMixin, MetaMixin, object):
         # Do some Checks for Required Values
         if self._meta.base_url is None:
             raise exceptions.ImproperlyConfigured("base_url is required")
-
-        self.http_client = HttpClient()
-
-        if self._meta.authentication is not None:
-            self.http_client.add_credentials(**self._meta.authentication)
