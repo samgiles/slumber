@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.2.5
+-----
+
+* Fixed https urls and the accidental force to port 80
+* Fixed the assumption that all urls end in a trailing slash
+
 0.2.4
 -----
 
