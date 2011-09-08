@@ -55,9 +55,6 @@ class Resource(object):
             if hasattr(self, "object_id"):
                 url = urlparse.urljoin(url, str(self.object_id))
 
-            if not url.endswith("/"):
-                url += "/"
-
         if "body" in kwargs:
             body = kwargs.pop("body")
         else:
@@ -211,7 +208,7 @@ class API(object):
         except KeyError:
             self._meta.resources[item] = Resource(
                 self._meta.base_url,
-                endpoint=urlparse.urljoin(self._meta.http["path"], item) + "/",
+                endpoint=urlparse.urljoin(self._meta.http["path"], item),
                 format=self._meta.default_format,
                 authentication=self._meta.authentication
             )
