@@ -105,7 +105,7 @@ class Resource(ResourceAttributesMixin, MetaMixin, object):
         if self._meta.authentication is not None:
             self._http.add_credentials(**self._meta.authentication)
 
-    def __call__(self, id=None, format=None, url_overide=None):
+    def __call__(self, id=None, format=None, url_override=None):
         """
         Returns a new instance of self modified by one or more of the available
         parameters. These allows us to do things like override format for a
@@ -114,7 +114,7 @@ class Resource(ResourceAttributesMixin, MetaMixin, object):
         """
 
         # Short Circuit out if the call is empty
-        if id is None and format is None and url_overide is None:
+        if id is None and format is None and url_override is None:
             return self
 
         kwargs = dict([x for x in self._meta.__dict__.items() if not x[0].startswith("_")])
@@ -125,11 +125,11 @@ class Resource(ResourceAttributesMixin, MetaMixin, object):
         if format is not None:
             kwargs["format"] = format
 
-        if url_overide is not None:
+        if url_override is not None:
             # @@@ This is hacky and we should probably figure out a better way
             #    of handling the case when a POST/PUT doesn't return an object
             #    but a Location to an object that we need to GET.
-            kwargs["base_url"] = url_overide
+            kwargs["base_url"] = url_override
         
         return self.__class__(**kwargs)
 
