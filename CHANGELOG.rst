@@ -1,6 +1,14 @@
 Changelog
 =========
 
+0.3.1
+-----
+
+* Fix regression where pre 0.3 urls were assumed to end in slash, and 0.3.0 presumed to end in not slash.
+  Urls are now assumed to end in a slash, and if you don't want this behavior you can disable it by the
+  append_slash kwarg/Meta option (set to False to disable it).
+* Fix regression caused by a mistyped variable name.
+
 0.3.0
 -----
 
