@@ -40,3 +40,11 @@ If you want to override the serializer for a particular request, you can do that
     # Use Yaml instead of Json for just this request.
     api = slumber.API("http://path/to/my/api/") # Serializer defaults to Json
     api.resource_name(format="yaml").get() # Serializer will be Yaml
+
+Slashes
+=======
+
+Slumber assumes by default that all urls should end with a slash. If you do not 
+want this behavior you can control it via the append_slash Meta option which can be
+set by passing append_slash to the ``slumber.API`` kwargs, or by setting append_slash
+in a subclasses Meta class.
