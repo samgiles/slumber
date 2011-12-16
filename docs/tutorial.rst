@@ -7,7 +7,7 @@ Getting Started with Slumber
 Installation
 ============
 
-Slumber is available on PyPi and the preffered method of install is
+Slumber is available on PyPi and the preferred method of install is
 using Pip.
 
 1. Install Slumber::
@@ -56,7 +56,7 @@ authentication, you could do so like::
 
     >>> api.resource.get(username="example", api_key="1639eb74e86717f410c640d2712557aac0e989c8")
 
-If you wanted to filter the Slumber demo api for notes that atart with Bacon, you could do::
+If you wanted to filter the Slumber demo api for notes that start with Bacon, you could do::
 
     >>> import slumber
     >>> api = slumber.API("http://slumber.in/api/v1/", authentication={"name": "demo", "password": "demo"})
@@ -101,6 +101,6 @@ you must pass it in through the init.
 How Slumber's Meta System Works
 -------------------------------
 
-Slumber's Meta system works by gathering the paramters passed into the init method,
+Slumber's Meta system works by gathering the parameters passed into the init method,
 and gathering any Meta classes for any object in the classes MRO. It then merges
 then together, letting init override classes, and subclasses overriding super classes.
