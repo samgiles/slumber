@@ -1,47 +1,36 @@
 import mock
 import unittest
-import httplib2
+import requests
 import slumber
-
-
-class ResourceAttributesMixinTestCase(unittest.TestCase):
-
-    def test_attribute_fallback_to_resource(self):
-        class ResourceMixinTest(slumber.ResourceAttributesMixin, slumber.MetaMixin, object):
-            class Meta:
-                authentication = None
-                base_url = None
-                format = "json"
-
-        rmt = ResourceMixinTest(base_url="http://example.com/")
-        self.assertTrue(isinstance(rmt.example, slumber.Resource))
 
 
 class ResourceTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.base_resource = slumber.Resource(base_url="http://example/api/v1/test")
+        self.base_resource = slumber.Resource(base_url="http://example/api/v1/test", format="json", append_slash=False)
 
     def test_get_serializer(self):
         self.assertTrue(isinstance(self.base_resource.get_serializer(), slumber.Serializer))
 
     def test_request_200(self):
-        # Mock a Response Object
-        r = mock.Mock(spec=httplib2.Response)
-        r.status = 200
+        r = mock.Mock(spec=requests.Response)
+        r.status_code = 200
+        r.content = "Mocked Content"
 
-        # Mock The httplib2.Http class
-        self.base_resource._http = mock.Mock(spec=httplib2.Http)
-        self.base_resource._http.request.return_value = (r, "Mocked Content")
+        self.base_resource._store.update({
+            "session": mock.Mock(spec=requests.Session),
+        })
+        self.base_resource._store["session"].request.return_value = r
 
-        resp, content = self.base_resource._request("GET")
+        resp = self.base_resource._request("GET")
 
         self.assertTrue(resp is r)
-        self.assertEqual(content, "Mocked Content")
+        self.assertEqual(resp.content, "Mocked Content")
 
-        self.base_resource._http.request.assert_called_once_with(
-            "http://example/api/v1/test",
+        self.base_resource._store["session"].request.assert_called_once_with(
             "GET",
-            body=None,
+            "http://example/api/v1/test",
+            data=None,
+            params=None,
             headers={"content-type": self.base_resource.get_serializer().get_content_type()}
         )
