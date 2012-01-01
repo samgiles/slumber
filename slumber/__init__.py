@@ -110,31 +110,31 @@ class Resource(ResourceAttributesMixin, object):
         elif 500 <= resp.status_code <= 599:
             raise exceptions.HttpServerError("Server Error %s: %s" % (resp.status_code, url), response=resp, content=resp.content)
 
-        return resp, resp.content
+        return resp
 
     def get(self, **kwargs):
         s = self.get_serializer()
 
-        resp, content = self._request("GET", **kwargs)
+        resp = self._request("GET", **kwargs)
         if 200 <= resp.status_code <= 299:
             if resp.status_code == 200:
-                return s.loads(content)
+                return s.loads(resp.content)
             else:
-                return content
+                return resp.content
         else:
             return  # @@@ We should probably do some sort of error here? (Is this even possible?)
 
     def post(self, data, **kwargs):
         s = self.get_serializer()
 
-        resp, content = self._request("POST", body=s.dumps(data), **kwargs)
+        resp = self._request("POST", body=s.dumps(data), **kwargs)
         if 200 <= resp.status_code <= 299:
             if resp.status_code == 201:
                 # @@@ Hacky, see description in __call__
                 resource_obj = self(url_override=resp.headers["location"])
                 return resource_obj.get(**kwargs)
             else:
-                return content
+                return resp.content
         else:
             # @@@ Need to be Some sort of Error Here or Something
             return
@@ -142,7 +142,7 @@ class Resource(ResourceAttributesMixin, object):
     def put(self, data, **kwargs):
         s = self.get_serializer()
 
-        resp, content = self._request("PUT", body=s.dumps(data), **kwargs)
+        resp = self._request("PUT", body=s.dumps(data), **kwargs)
         if 200 <= resp.status_code <= 299:
             if resp.status_code == 204:
                 return True
@@ -152,7 +152,7 @@ class Resource(ResourceAttributesMixin, object):
             return False
 
     def delete(self, **kwargs):
-        resp, content = self._request("DELETE", **kwargs)
+        resp = self._request("DELETE", **kwargs)
         if 200 <= resp.status_code <= 299:
             if resp.status_code == 204:
                 return True
