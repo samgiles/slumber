@@ -91,14 +91,14 @@ class Resource(ResourceAttributesMixin, object):
     def get_serializer(self):
         return Serializer(default_format=self._store["format"])
 
-    def _request(self, method, data=None, **kwargs):
+    def _request(self, method, data=None, params=None):
         s = self.get_serializer()
         url = self._store["base_url"]
 
         if self._store["append_slash"] and not url.endswith("/"):
             url = url + "/"
 
-        resp = self._store["session"].request(method, url, data=data, params=kwargs, headers={"content-type": s.get_content_type()})
+        resp = self._store["session"].request(method, url, data=data, params=params, headers={"content-type": s.get_content_type()})
 
         if 400 <= resp.status_code <= 499:
             raise exceptions.HttpClientError("Client Error %s: %s" % (resp.status_code, url), response=resp, content=resp.content)
@@ -110,7 +110,7 @@ class Resource(ResourceAttributesMixin, object):
     def get(self, **kwargs):
         s = self.get_serializer()
 
-        resp = self._request("GET", **kwargs)
+        resp = self._request("GET", params=kwargs)
         if 200 <= resp.status_code <= 299:
             if resp.status_code == 200:
                 return s.loads(resp.content)
@@ -122,12 +122,12 @@ class Resource(ResourceAttributesMixin, object):
     def post(self, data, **kwargs):
         s = self.get_serializer()
 
-        resp = self._request("POST", data=s.dumps(data), **kwargs)
+        resp = self._request("POST", data=s.dumps(data), params=kwargs)
         if 200 <= resp.status_code <= 299:
             if resp.status_code == 201:
                 # @@@ Hacky, see description in __call__
                 resource_obj = self(url_override=resp.headers["location"])
-                return resource_obj.get(**kwargs)
+                return resource_obj.get(params=kwargs)
             else:
                 return resp.content
         else:
@@ -137,7 +137,7 @@ class Resource(ResourceAttributesMixin, object):
     def put(self, data, **kwargs):
         s = self.get_serializer()
 
-        resp = self._request("PUT", data=s.dumps(data), **kwargs)
+        resp = self._request("PUT", data=s.dumps(data), params=kwargs)
         if 200 <= resp.status_code <= 299:
             if resp.status_code == 204:
                 return True
@@ -147,7 +147,7 @@ class Resource(ResourceAttributesMixin, object):
             return False
 
     def delete(self, **kwargs):
-        resp = self._request("DELETE", **kwargs)
+        resp = self._request("DELETE", params=kwargs)
         if 200 <= resp.status_code <= 299:
             if resp.status_code == 204:
                 return True
