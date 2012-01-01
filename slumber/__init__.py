@@ -104,9 +104,6 @@ class Resource(ResourceAttributesMixin, object):
         else:
             body = None
 
-        # if kwargs:
-        #     url = "?".join([url, urllib.urlencode(kwargs)])
-
         resp = self._store["session"].request(method, url, data=body, params=kwargs, headers={"content-type": s.get_content_type()})
 
         if 400 <= resp.status_code <= 499:
