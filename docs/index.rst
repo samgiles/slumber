@@ -3,10 +3,10 @@ Slumber documentation
 
 Slumber is a python library that provides a convenient yet powerful object
 orientated interface to ReSTful APIs. It acts as a wrapper around the
-excellent httplib2_ library and abstracts away the handling of urls, serialization,
+excellent requests_ library and abstracts away the handling of urls, serialization,
 and processing requests.
 
-.. _httplib2: http://code.google.com/p/httplib2/
+.. _requests: http://python-requests.org/
 
 .. toctree::
    :maxdepth: 2
@@ -18,12 +18,10 @@ and processing requests.
 Getting Help
 ============
 
-There are two primary ways of getting help. We have a `mailing list`_ hosted at
-Google (http://groups.google.com/group/python-slumber/) and an IRC channel
+There are two primary ways of getting help. I have an IRC channel
 (`#slumber on irc.freenode.net`_) to get help, want to bounce idea or
 generally shoot the breeze.
 
-.. _`mailing list`: http://groups.google.com/group/python-slumber/
 .. _#slumber on irc.freenode.net: irc://irc.freenode.net/slumber
 
 QuickStart
@@ -45,7 +43,7 @@ Requirements
 Slumber requires the following modules:
 
 * Python 2.5+
-* httplib2
+* requests
 * simplejson (If using Python 2.5, or you desire the speedups for JSON serialization)
 * pyyaml (If you are using the optional yaml serialization)
 
