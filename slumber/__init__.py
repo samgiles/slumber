@@ -2,7 +2,7 @@ import posixpath
 import urllib
 import urlparse
 
-import httplib2
+import requests
 
 from slumber import exceptions
 from slumber.serialize import Serializer
@@ -77,6 +77,7 @@ class ResourceAttributesMixin(object):
             format=self._meta.format,
             authentication=self._meta.authentication,
             append_slash=self._meta.append_slash,
+            session=self._session,
         )
 
 
@@ -98,12 +99,9 @@ class Resource(ResourceAttributesMixin, MetaMixin, object):
         append_slash = True
 
     def __init__(self, *args, **kwargs):
+        self._session = kwargs.pop("session")
+
         super(Resource, self).__init__(*args, **kwargs)
-
-        self._http = httplib2.Http()
-
-        if self._meta.authentication is not None:
-            self._http.add_credentials(**self._meta.authentication)
 
     def __call__(self, id=None, format=None, url_override=None):
         """
@@ -130,7 +128,9 @@ class Resource(ResourceAttributesMixin, MetaMixin, object):
             #    of handling the case when a POST/PUT doesn't return an object
             #    but a Location to an object that we need to GET.
             kwargs["base_url"] = url_override
-        
+
+        kwargs["session"] = self._session
+
         return self.__class__(**kwargs)
 
     def get_serializer(self):
@@ -148,24 +148,24 @@ class Resource(ResourceAttributesMixin, MetaMixin, object):
         else:
             body = None
 
-        if kwargs:
-            url = "?".join([url, urllib.urlencode(kwargs)])
+        # if kwargs:
+        #     url = "?".join([url, urllib.urlencode(kwargs)])
 
-        resp, content = self._http.request(url, method, body=body, headers={"content-type": s.get_content_type()})
+        resp = self._session.request(method, url, data=body, params=kwargs, headers={"content-type": s.get_content_type()})
 
-        if 400 <= resp.status <= 499:
-            raise exceptions.HttpClientError("Client Error %s: %s" % (resp.status, url), response=resp, content=content)
-        elif 500 <= resp.status <= 599:
-            raise exceptions.HttpServerError("Server Error %s: %s" % (resp.status, url), response=resp, content=content)
+        if 400 <= resp.status_code <= 499:
+            raise exceptions.HttpClientError("Client Error %s: %s" % (resp.status_code, url), response=resp, content=resp.content)
+        elif 500 <= resp.status_code <= 599:
+            raise exceptions.HttpServerError("Server Error %s: %s" % (resp.status_code, url), response=resp, content=resp.content)
 
-        return resp, content
+        return resp, resp.content
 
     def get(self, **kwargs):
         s = self.get_serializer()
 
         resp, content = self._request("GET", **kwargs)
-        if 200 <= resp.status <= 299:
-            if resp.status == 200:
+        if 200 <= resp.status_code <= 299:
+            if resp.status_code == 200:
                 return s.loads(content)
             else:
                 return content
@@ -176,8 +176,8 @@ class Resource(ResourceAttributesMixin, MetaMixin, object):
         s = self.get_serializer()
 
         resp, content = self._request("POST", body=s.dumps(data), **kwargs)
-        if 200 <= resp.status <= 299:
-            if resp.status == 201:
+        if 200 <= resp.status_code <= 299:
+            if resp.status_code == 201:
                 # @@@ Hacky, see description in __call__
                 resource_obj = self(url_override=resp["location"])
                 return resource_obj.get(**kwargs)
@@ -191,8 +191,8 @@ class Resource(ResourceAttributesMixin, MetaMixin, object):
         s = self.get_serializer()
 
         resp, content = self._request("PUT", body=s.dumps(data), **kwargs)
-        if 200 <= resp.status <= 299:
-            if resp.status == 204:
+        if 200 <= resp.status_code <= 299:
+            if resp.status_code == 204:
                 return True
             else:
                 return True  # @@@ Should this really be True?
@@ -201,8 +201,8 @@ class Resource(ResourceAttributesMixin, MetaMixin, object):
 
     def delete(self, **kwargs):
         resp, content = self._request("DELETE", **kwargs)
-        if 200 <= resp.status <= 299:
-            if resp.status == 204:
+        if 200 <= resp.status_code <= 299:
+            if resp.status_code == 204:
                 return True
             else:
                 return True  # @@@ Should this really be True?
@@ -221,7 +221,9 @@ class API(ResourceAttributesMixin, MetaMixin, object):
     def __init__(self, base_url=None, **kwargs):
         if base_url is not None:
             kwargs.update({"base_url": base_url})
-            
+
+        self._session = requests.session()
+
         super(API, self).__init__(**kwargs)
 
         # Do some Checks for Required Values
