@@ -75,7 +75,6 @@ class ResourceAttributesMixin(object):
         return Resource(
             base_url=url_join(self._meta.base_url, item),
             format=self._meta.format,
-            authentication=self._meta.authentication,
             append_slash=self._meta.append_slash,
             session=self._session,
         )
@@ -93,7 +92,6 @@ class Resource(ResourceAttributesMixin, MetaMixin, object):
     """
 
     class Meta:
-        authentication = None
         base_url = None
         format = "json"
         append_slash = True
@@ -213,16 +211,15 @@ class Resource(ResourceAttributesMixin, MetaMixin, object):
 class API(ResourceAttributesMixin, MetaMixin, object):
 
     class Meta:
-        authentication = None
         base_url = None
         format = "json"
         append_slash = True
 
-    def __init__(self, base_url=None, **kwargs):
+    def __init__(self, base_url=None, auth=None, **kwargs):
         if base_url is not None:
             kwargs.update({"base_url": base_url})
 
-        self._session = requests.session()
+        self._session = requests.session(auth=auth)
 
         super(API, self).__init__(**kwargs)
 
