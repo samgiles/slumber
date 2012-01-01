@@ -135,7 +135,7 @@ class Resource(ResourceAttributesMixin, object):
         if 200 <= resp.status_code <= 299:
             if resp.status_code == 201:
                 # @@@ Hacky, see description in __call__
-                resource_obj = self(url_override=resp["location"])
+                resource_obj = self(url_override=resp.headers["location"])
                 return resource_obj.get(**kwargs)
             else:
                 return content
