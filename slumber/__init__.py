@@ -91,19 +91,14 @@ class Resource(ResourceAttributesMixin, object):
     def get_serializer(self):
         return Serializer(default_format=self._store["format"])
 
-    def _request(self, method, **kwargs):
+    def _request(self, method, data=None, **kwargs):
         s = self.get_serializer()
         url = self._store["base_url"]
 
         if self._store["append_slash"] and not url.endswith("/"):
             url = url + "/"
 
-        if "body" in kwargs:
-            body = kwargs.pop("body")
-        else:
-            body = None
-
-        resp = self._store["session"].request(method, url, data=body, params=kwargs, headers={"content-type": s.get_content_type()})
+        resp = self._store["session"].request(method, url, data=data, params=kwargs, headers={"content-type": s.get_content_type()})
 
         if 400 <= resp.status_code <= 499:
             raise exceptions.HttpClientError("Client Error %s: %s" % (resp.status_code, url), response=resp, content=resp.content)
@@ -127,7 +122,7 @@ class Resource(ResourceAttributesMixin, object):
     def post(self, data, **kwargs):
         s = self.get_serializer()
 
-        resp = self._request("POST", body=s.dumps(data), **kwargs)
+        resp = self._request("POST", data=s.dumps(data), **kwargs)
         if 200 <= resp.status_code <= 299:
             if resp.status_code == 201:
                 # @@@ Hacky, see description in __call__
@@ -142,7 +137,7 @@ class Resource(ResourceAttributesMixin, object):
     def put(self, data, **kwargs):
         s = self.get_serializer()
 
-        resp = self._request("PUT", body=s.dumps(data), **kwargs)
+        resp = self._request("PUT", data=s.dumps(data), **kwargs)
         if 200 <= resp.status_code <= 299:
             if resp.status_code == 204:
                 return True
