@@ -162,7 +162,7 @@ class API(ResourceAttributesMixin, object):
     def __init__(self, base_url=None, auth=None, format=None, append_slash=True):
         self._store = {
             "base_url": base_url,
-            "format": format,
+            "format": format if format is not None else "json",
             "append_slash": append_slash,
             "session": requests.session(auth=auth),
         }
