@@ -21,7 +21,7 @@ api instance, instead of doing::
 
 You supply the username and password (for Basic Auth) like::
 
-    api = slumber.API("http://path/to/my/api/", auth("myuser", "mypass"))
+    api = slumber.API("http://path/to/my/api/", auth=("myuser", "mypass"))
 
 And slumber will attempt to use those credentials with each request.
 
