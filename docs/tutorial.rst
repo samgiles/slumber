@@ -35,7 +35,8 @@ which you can see at http://slumber.in/api/v1/.
 .. code-block:: pycon
 
     >>> import slumber
-    >>> api = slumber.API("http://slumber.in/api/v1/", authentication={"name": "demo", "password": "demo"})
+    >>> ## Connect to http://slumber.in/api/v1/ with the Basic Auth user/password of demo/demo
+    >>> api = slumber.API("http://slumber.in/api/v1/", auth("demo", "demo")
     >>> ## GET http://slumber.in/api/v1/note/
     >>> ##     Note: Any kwargs passed to get(), post(), put(), delete() will be used as url parameters
     >>> api.note.get()
@@ -74,33 +75,3 @@ Nested resources are also easy and works just how a single level resource works:
 
     >>> ## GET /resource1/1/resource2/
     >>> api.resource1(1).resource2.get()
-
-
-Make your Own API Classes
-=========================
-
-In order to follow DRY Slumber allows you to create a special subclass of
-``slumber.API`` that lets you specify default values. This looks like::
-
-    >>> import slumber
-    >>> class NoteApi(slumber.API):
-    ...     class Meta:
-    ...         base_url = "http://slumber.in/api/v1/"
-    ...         authentication = {"name": "demo", "password": "demo"} # Can be From Settings
-    ...         format = "json"
-    ...
-    >>> api = NoteApi()
-    >>> ## GET http://slumber.in/api/v1/note/
-    >>> api.note.get()
-
-You can also override any of your subclasses Meta options by passing it to your
-subclasses init method just as if you were using ``slumber.API`` directly. The only
-required attribute is that you must either set a base_url in the Meta class, or 
-you must pass it in through the init.
-
-How Slumber's Meta System Works
--------------------------------
-
-Slumber's Meta system works by gathering the parameters passed into the init method,
-and gathering any Meta classes for any object in the classes MRO. It then merges
-then together, letting init override classes, and subclasses overriding super classes.

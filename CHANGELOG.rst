@@ -1,6 +1,14 @@
 Changelog
 =========
 
+0.4.0
+-----
+
+* *(Backwards Incompatible)* Switched from ``httplib2`` to ``requests``
+* *(Backwards Incompatible)* Removed the Meta class Magic
+* *(Backwards Incompatible)* Removed the ability to subclass ``slumber.API`` to specify defaults
+* *(Backwards Incompatible)* New Syntax for Specifying Authentication
+
 0.3.1
 -----
 
@@ -41,7 +49,7 @@ Changelog
 
 * *(Backwards Incompatible)* Move specifying a non default serializer from
   ``api.resource.get(format="yaml")`` to ``api.resource(format="yaml").get()``
-  
+
 * Reworked the internal ``Resource`` api to not clobber any kwargs passed to it. This
   fixes a bug where you couldn't use ``format`` or ``url`` as the name for one of
   the url parameters.

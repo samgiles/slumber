@@ -1,8 +1,7 @@
 import posixpath
-import urllib
 import urlparse
 
-import httplib2
+import requests
 
 from slumber import exceptions
 from slumber.serialize import Serializer
@@ -20,44 +19,6 @@ def url_join(base, *args):
     return urlparse.urlunsplit([scheme, netloc, path, query, fragment])
 
 
-class Meta(object):
-    """
-    Model that acts as a container class for a meta attributes for a larger
-    class. It stuffs any kwarg it gets in it's init as an attribute of itself.
-    """
-
-    def __init__(self, **kwargs):
-        for key, value in kwargs.iteritems():
-            setattr(self, key, value)
-
-
-class MetaMixin(object):
-    """
-    Mixin that provides the Meta class support to add settings to instances
-    of slumber objects. Meta settings cannot start with a _.
-    """
-
-    def __init__(self, *args, **kwargs):
-        # Get a List of all the Classes we in our MRO, find any attribute named
-        #     Meta on them, and then merge them together in order of MRO
-        metas = reversed([x.Meta for x in self.__class__.mro() if hasattr(x, "Meta")])
-        final_meta = {}
-
-        # Merge the Meta classes into one dict
-        for meta in metas:
-            final_meta.update(dict([x for x in meta.__dict__.items() if not x[0].startswith("_")]))
-
-        # Update the final Meta with any kwargs passed in
-        for key in final_meta.keys():
-            if key in kwargs:
-                final_meta[key] = kwargs.pop(key)
-
-        self._meta = Meta(**final_meta)
-
-        # Finally Pass anything unused along the MRO
-        super(MetaMixin, self).__init__(*args, **kwargs)
-
-
 class ResourceAttributesMixin(object):
     """
     A Mixin that makes it so that accessing an undefined attribute on a class
@@ -72,15 +33,16 @@ class ResourceAttributesMixin(object):
         if item.startswith("_"):
             raise AttributeError(item)
 
-        return Resource(
-            base_url=url_join(self._meta.base_url, item),
-            format=self._meta.format,
-            authentication=self._meta.authentication,
-            append_slash=self._meta.append_slash,
-        )
+        kwargs = {}
+        for key, value in self._store.iteritems():
+            kwargs[key] = value
+
+        kwargs.update({"base_url": url_join(self._store["base_url"], item)})
+
+        return Resource(**kwargs)
 
 
-class Resource(ResourceAttributesMixin, MetaMixin, object):
+class Resource(ResourceAttributesMixin, object):
     """
     Resource provides the main functionality behind slumber. It handles the
     attribute -> url, kwarg -> query param, and other related behind the scenes
@@ -91,19 +53,8 @@ class Resource(ResourceAttributesMixin, MetaMixin, object):
     attributes.
     """
 
-    class Meta:
-        authentication = None
-        base_url = None
-        format = "json"
-        append_slash = True
-
     def __init__(self, *args, **kwargs):
-        super(Resource, self).__init__(*args, **kwargs)
-
-        self._http = httplib2.Http()
-
-        if self._meta.authentication is not None:
-            self._http.add_credentials(**self._meta.authentication)
+        self._store = kwargs
 
     def __call__(self, id=None, format=None, url_override=None):
         """
@@ -117,10 +68,12 @@ class Resource(ResourceAttributesMixin, MetaMixin, object):
         if id is None and format is None and url_override is None:
             return self
 
-        kwargs = dict([x for x in self._meta.__dict__.items() if not x[0].startswith("_")])
+        kwargs = {}
+        for key, value in self._store.iteritems():
+            kwargs[key] = value
 
         if id is not None:
-            kwargs["base_url"] = url_join(self._meta.base_url, id)
+            kwargs["base_url"] = url_join(self._store["base_url"], id)
 
         if format is not None:
             kwargs["format"] = format
@@ -130,59 +83,53 @@ class Resource(ResourceAttributesMixin, MetaMixin, object):
             #    of handling the case when a POST/PUT doesn't return an object
             #    but a Location to an object that we need to GET.
             kwargs["base_url"] = url_override
-        
+
+        kwargs["session"] = self._store["session"]
+
         return self.__class__(**kwargs)
 
     def get_serializer(self):
-        return Serializer(default_format=self._meta.format)
+        return Serializer(default_format=self._store["format"])
 
-    def _request(self, method, **kwargs):
+    def _request(self, method, data=None, params=None):
         s = self.get_serializer()
-        url = self._meta.base_url
+        url = self._store["base_url"]
 
-        if self._meta.append_slash and not url.endswith("/"):
+        if self._store["append_slash"] and not url.endswith("/"):
             url = url + "/"
 
-        if "body" in kwargs:
-            body = kwargs.pop("body")
-        else:
-            body = None
+        resp = self._store["session"].request(method, url, data=data, params=params, headers={"content-type": s.get_content_type()})
 
-        if kwargs:
-            url = "?".join([url, urllib.urlencode(kwargs)])
+        if 400 <= resp.status_code <= 499:
+            raise exceptions.HttpClientError("Client Error %s: %s" % (resp.status_code, url), response=resp, content=resp.content)
+        elif 500 <= resp.status_code <= 599:
+            raise exceptions.HttpServerError("Server Error %s: %s" % (resp.status_code, url), response=resp, content=resp.content)
 
-        resp, content = self._http.request(url, method, body=body, headers={"content-type": s.get_content_type()})
-
-        if 400 <= resp.status <= 499:
-            raise exceptions.HttpClientError("Client Error %s: %s" % (resp.status, url), response=resp, content=content)
-        elif 500 <= resp.status <= 599:
-            raise exceptions.HttpServerError("Server Error %s: %s" % (resp.status, url), response=resp, content=content)
-
-        return resp, content
+        return resp
 
     def get(self, **kwargs):
         s = self.get_serializer()
 
-        resp, content = self._request("GET", **kwargs)
-        if 200 <= resp.status <= 299:
-            if resp.status == 200:
-                return s.loads(content)
+        resp = self._request("GET", params=kwargs)
+        if 200 <= resp.status_code <= 299:
+            if resp.status_code == 200:
+                return s.loads(resp.content)
             else:
-                return content
+                return resp.content
         else:
             return  # @@@ We should probably do some sort of error here? (Is this even possible?)
 
     def post(self, data, **kwargs):
         s = self.get_serializer()
 
-        resp, content = self._request("POST", body=s.dumps(data), **kwargs)
-        if 200 <= resp.status <= 299:
-            if resp.status == 201:
+        resp = self._request("POST", data=s.dumps(data), params=kwargs)
+        if 200 <= resp.status_code <= 299:
+            if resp.status_code == 201:
                 # @@@ Hacky, see description in __call__
-                resource_obj = self(url_override=resp["location"])
-                return resource_obj.get(**kwargs)
+                resource_obj = self(url_override=resp.headers["location"])
+                return resource_obj.get(params=kwargs)
             else:
-                return content
+                return resp.content
         else:
             # @@@ Need to be Some sort of Error Here or Something
             return
@@ -190,9 +137,9 @@ class Resource(ResourceAttributesMixin, MetaMixin, object):
     def put(self, data, **kwargs):
         s = self.get_serializer()
 
-        resp, content = self._request("PUT", body=s.dumps(data), **kwargs)
-        if 200 <= resp.status <= 299:
-            if resp.status == 204:
+        resp = self._request("PUT", data=s.dumps(data), params=kwargs)
+        if 200 <= resp.status_code <= 299:
+            if resp.status_code == 204:
                 return True
             else:
                 return True  # @@@ Should this really be True?
@@ -200,9 +147,9 @@ class Resource(ResourceAttributesMixin, MetaMixin, object):
             return False
 
     def delete(self, **kwargs):
-        resp, content = self._request("DELETE", **kwargs)
-        if 200 <= resp.status <= 299:
-            if resp.status == 204:
+        resp = self._request("DELETE", params=kwargs)
+        if 200 <= resp.status_code <= 299:
+            if resp.status_code == 204:
                 return True
             else:
                 return True  # @@@ Should this really be True?
@@ -210,20 +157,16 @@ class Resource(ResourceAttributesMixin, MetaMixin, object):
             return False
 
 
-class API(ResourceAttributesMixin, MetaMixin, object):
+class API(ResourceAttributesMixin, object):
 
-    class Meta:
-        authentication = None
-        base_url = None
-        format = "json"
-        append_slash = True
-
-    def __init__(self, base_url=None, **kwargs):
-        if base_url is not None:
-            kwargs.update({"base_url": base_url})
-            
-        super(API, self).__init__(**kwargs)
+    def __init__(self, base_url=None, auth=None, format=None, append_slash=True):
+        self._store = {
+            "base_url": base_url,
+            "format": format if format is not None else "json",
+            "append_slash": append_slash,
+            "session": requests.session(auth=auth),
+        }
 
         # Do some Checks for Required Values
-        if self._meta.base_url is None:
+        if self._store.get("base_url") is None:
             raise exceptions.ImproperlyConfigured("base_url is required")
