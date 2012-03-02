@@ -60,7 +60,7 @@ authentication, you could do so like::
 If you wanted to filter the Slumber demo api for notes that start with Bacon, you could do::
 
     >>> import slumber
-    >>> api = slumber.API("http://slumber.in/api/v1/", authentication={"name": "demo", "password": "demo"})
+    >>> api = slumber.API("http://slumber.in/api/v1/", auth=("demo", "demo"))
     >>> ## GET http://slumber.in/api/v1/note/?title__startswith=Bacon
     >>> api.note.get(title__startswith="Bacon")
 
