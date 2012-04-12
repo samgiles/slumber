@@ -32,5 +32,5 @@ class ResourceTestCase(unittest.TestCase):
             "http://example/api/v1/test",
             data=None,
             params=None,
-            headers={"content-type": self.base_resource.get_serializer().get_content_type()}
+            headers={"content-type": self.base_resource.get_serializer().get_content_type(), "accept": self.base_resource.get_serializer().get_content_type()}
         )
