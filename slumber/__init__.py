@@ -15,7 +15,7 @@ def url_join(base, *args):
     """
     scheme, netloc, path, query, fragment = urlparse.urlsplit(base)
     path = path if len(path) else "/"
-    path = posixpath.join(path, *[str(x) for x in args])
+    path = posixpath.join(path, *[('%s' % x) for x in args])
     return urlparse.urlunsplit([scheme, netloc, path, query, fragment])
 
 
