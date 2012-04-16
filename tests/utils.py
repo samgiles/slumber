@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import unittest
 import slumber
 
@@ -44,3 +46,17 @@ class UtilsTestCase(unittest.TestCase):
     def test_url_join_trailing_slash(self):
         self.assertEqual(slumber.url_join("http://example.com/", "test/"), "http://example.com/test/")
         self.assertEqual(slumber.url_join("http://example.com/", "test/", "example/"), "http://example.com/test/example/")
+
+    def test_url_join_encoded_unicode(self):
+        expected = "http://example.com/tǝst/"
+
+        url = slumber.url_join("http://example.com/", "tǝst/")
+        self.assertEqual(url, expected)
+
+        url = slumber.url_join("http://example.com/", "tǝst/".decode('utf8').encode('utf8'))
+        self.assertEqual(url, expected)
+
+    def test_url_join_decoded_unicode(self):
+        url = slumber.url_join("http://example.com/", "tǝst/".decode('utf8'))
+        expected = "http://example.com/tǝst/".decode('utf8')
+        self.assertEqual(url, expected)
