@@ -2,6 +2,12 @@ Changelog
 =========
 
 
+0.4.2
+-----
+
+* Support decoded unicode url fragments - Thanks @collinwat
+
+
 0.4.1
 -----
 
