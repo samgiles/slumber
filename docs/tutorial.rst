@@ -7,7 +7,7 @@ Getting Started with Slumber
 Installation
 ============
 
-Slumber is available on PyPi and the preffered method of install is
+Slumber is available on PyPi and the preferred method of install is
 using Pip.
 
 1. Install Slumber::
@@ -36,7 +36,7 @@ which you can see at http://slumber.in/api/v1/.
 
     >>> import slumber
     >>> ## Connect to http://slumber.in/api/v1/ with the Basic Auth user/password of demo/demo
-    >>> api = slumber.API("http://slumber.in/api/v1/", auth("demo", "demo")
+    >>> api = slumber.API("http://slumber.in/api/v1/", auth=("demo", "demo")
     >>> ## GET http://slumber.in/api/v1/note/
     >>> ##     Note: Any kwargs passed to get(), post(), put(), delete() will be used as url parameters
     >>> api.note.get()
@@ -57,7 +57,7 @@ authentication, you could do so like::
 
     >>> api.resource.get(username="example", api_key="1639eb74e86717f410c640d2712557aac0e989c8")
 
-If you wanted to filter the Slumber demo api for notes that atart with Bacon, you could do::
+If you wanted to filter the Slumber demo api for notes that start with Bacon, you could do::
 
     >>> import slumber
     >>> api = slumber.API("http://slumber.in/api/v1/", authentication={"name": "demo", "password": "demo"})

@@ -133,6 +133,21 @@ class Resource(ResourceAttributesMixin, object):
         else:
             # @@@ Need to be Some sort of Error Here or Something
             return
+        
+    def patch(self, data, **kwargs):
+        s = self.get_serializer()
+
+        resp = self._request("PATCH", data=s.dumps(data), params=kwargs)
+        if 200 <= resp.status_code <= 299:
+            if resp.status_code == 202:
+                # @@@ Hacky, see description in __call__
+                resource_obj = self(url_override=resp.headers["location"])
+                return resource_obj.get(params=kwargs)
+            else:
+                return resp.content
+        else:
+            # @@@ Need to be Some sort of Error Here or Something
+            return
 
     def put(self, data, **kwargs):
         s = self.get_serializer()

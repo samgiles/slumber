@@ -33,7 +33,7 @@ Nested Resources follow the same principle.
 
 The other part of an url that Slumber translates is kwargs to ``get()``, ``post()``,
 ``put()``, ``delete()`` into query string params. This again is a fairly simple 
-operation which then get's added to the end of the url.
+operation which then gets added to the end of the url.
 
 The Final portion of Slumber's Python to HTTP is that the first arg passed to 
 each of the HTTP functions is serialized, and then passed into the HTTP request
