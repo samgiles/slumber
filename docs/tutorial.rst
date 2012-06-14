@@ -44,6 +44,8 @@ which you can see at http://slumber.in/api/v1/.
     >>> new = api.note.post({"title": "My Test Note", "content": "This is the content of my Test Note!"})
     >>> ## PUT http://slumber.in/api/v1/note/{id}/
     >>> api.note(new["id"]).put({"content": "I just changed the content of my Test Note!"})
+    >>> ## PATCH http://slumber.in/api/v1/note/{id}/
+    >>> api.note(new["id"]).patch({"content": "Wat!"})
     >>> ## GET http://slumber.in/api/v1/note/{id}/
     >>> api.note(new["id"]).get()
     >>> ## DELETE http://slumber.in/api/v1/note/{id}/
