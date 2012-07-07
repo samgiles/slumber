@@ -109,10 +109,12 @@ class Resource(ResourceAttributesMixin, object):
 
         resp = self._request("GET", params=kwargs)
         if 200 <= resp.status_code <= 299:
-            if resp.status_code == 200:
-                return s.loads(resp.content)
-            else:
+            try:
+                stype = s.get_serializer(content_type=resp.headers.get("content-type"))
+            except exceptions.SerializerNotAvailable:
                 return resp.content
+
+            return stype.loads(resp.content)
         else:
             return  # @@@ We should probably do some sort of error here? (Is this even possible?)
 
