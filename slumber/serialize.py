@@ -1,6 +1,6 @@
 from slumber import exceptions
 
-SERIALIZERS = {
+_SERIALIZERS = {
     "json": True,
     "yaml": True,
 }
@@ -11,20 +11,18 @@ except ImportError:
     try:
         import json
     except ImportError:
-        SERIALIZERS["json"] = False
+        _SERIALIZERS["json"] = False
 
 try:
     import yaml
 except ImportError:
-    SERIALIZERS["yaml"] = False
-
-if not len([x for x in SERIALIZERS.values() if x]):
-    raise exceptions.SerializerNoAvailable("There are no Available Serializers.")
+    _SERIALIZERS["yaml"] = False
 
 
 class BaseSerializer(object):
 
     content_type = None
+    key = None
 
     def get_content_type(self):
         if self.content_type is None:
@@ -41,6 +39,7 @@ class BaseSerializer(object):
 class JsonSerializer(BaseSerializer):
 
     content_type = "application/json"
+    key = "json"
 
     def loads(self, data):
         return json.loads(data)
@@ -52,6 +51,7 @@ class JsonSerializer(BaseSerializer):
 class YamlSerializer(BaseSerializer):
 
     content_type = "text/yaml"
+    key = "yaml"
 
     def loads(self, data):
         return yaml.safe_load(data)
@@ -62,24 +62,30 @@ class YamlSerializer(BaseSerializer):
 
 class Serializer(object):
 
-    _serializers = {
-        "json": JsonSerializer(),
-        "yaml": YamlSerializer(),
-    }
+    def __init__(self, default=None, serializers=None):
+        if default is None:
+            default = "json" if _SERIALIZERS["json"] else "yaml"
 
-    def __init__(self, default_format="json"):
-        default_format = default_format if default_format is not None else "json"
+        if serializers is None:
+            serializers = [x() for x in [JsonSerializer, YamlSerializer] if _SERIALIZERS[x.key]]
 
-        self.available_serializers = [x[0] for x in SERIALIZERS.items() if x[1]]
-        self.default_format = self.get_serializer(default_format)
+        if not serializers:
+            raise exceptions.SerializerNoAvailable("There are no Available Serializers.")
+
+        self.serializers = {}
+
+        for serializer in serializers:
+            self.serializers[serializer.key] = serializer
+
+        self.default = default
 
     def get_serializer(self, name=None):
         if name is None:
-            return self.default_format
+            return self.serializers[self.default]
         else:
-            if not name in self.available_serializers:
+            if not name in self.serializers:
                 raise exceptions.SerializerNotAvailable("%s is not an available serializer" % name)
-            return self._serializers[name]
+            return self.serializers[name]
 
     def loads(self, data, format=None):
         s = self.get_serializer(format)

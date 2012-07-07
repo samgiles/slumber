@@ -89,7 +89,7 @@ class Resource(ResourceAttributesMixin, object):
         return self.__class__(**kwargs)
 
     def get_serializer(self):
-        return Serializer(default_format=self._store["format"])
+        return Serializer(default=self._store["format"])
 
     def _request(self, method, data=None, params=None):
         s = self.get_serializer()
@@ -133,7 +133,7 @@ class Resource(ResourceAttributesMixin, object):
         else:
             # @@@ Need to be Some sort of Error Here or Something
             return
-        
+
     def patch(self, data, **kwargs):
         s = self.get_serializer()
 
