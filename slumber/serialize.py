@@ -79,13 +79,18 @@ class Serializer(object):
 
         self.default = default
 
-    def get_serializer(self, name=None):
-        if name is None:
+    def get_serializer(self, name=None, content_type=None):
+        if name is None and content_type is None:
             return self.serializers[self.default]
-        else:
+        elif name is not None and content_type is None:
             if not name in self.serializers:
                 raise exceptions.SerializerNotAvailable("%s is not an available serializer" % name)
             return self.serializers[name]
+        else:
+            for x in self.serializers.values():
+                if content_type == x.get_content_type():
+                    return x
+            raise exceptions.SerializerNotAvailable("%s is not an available serializer" % name)
 
     def loads(self, data, format=None):
         s = self.get_serializer(format)
