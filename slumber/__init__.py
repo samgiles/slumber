@@ -88,11 +88,8 @@ class Resource(ResourceAttributesMixin, object):
 
         return self.__class__(**kwargs)
 
-    def get_serializer(self):
-        return Serializer(default_format=self._store["format"])
-
     def _request(self, method, data=None, params=None):
-        s = self.get_serializer()
+        s = self._store["serializer"]
         url = self._store["base_url"]
 
         if self._store["append_slash"] and not url.endswith("/"):
@@ -108,7 +105,7 @@ class Resource(ResourceAttributesMixin, object):
         return resp
 
     def get(self, **kwargs):
-        s = self.get_serializer()
+        s = self._store["serializer"]
 
         resp = self._request("GET", params=kwargs)
         if 200 <= resp.status_code <= 299:
@@ -120,7 +117,7 @@ class Resource(ResourceAttributesMixin, object):
             return  # @@@ We should probably do some sort of error here? (Is this even possible?)
 
     def post(self, data, **kwargs):
-        s = self.get_serializer()
+        s = self._store["serializer"]
 
         resp = self._request("POST", data=s.dumps(data), params=kwargs)
         if 200 <= resp.status_code <= 299:
@@ -133,9 +130,9 @@ class Resource(ResourceAttributesMixin, object):
         else:
             # @@@ Need to be Some sort of Error Here or Something
             return
-        
+
     def patch(self, data, **kwargs):
-        s = self.get_serializer()
+        s = self._store["serializer"]
 
         resp = self._request("PATCH", data=s.dumps(data), params=kwargs)
         if 200 <= resp.status_code <= 299:
@@ -150,7 +147,7 @@ class Resource(ResourceAttributesMixin, object):
             return
 
     def put(self, data, **kwargs):
-        s = self.get_serializer()
+        s = self._store["serializer"]
 
         resp = self._request("PUT", data=s.dumps(data), params=kwargs)
         if 200 <= resp.status_code <= 299:
@@ -174,12 +171,16 @@ class Resource(ResourceAttributesMixin, object):
 
 class API(ResourceAttributesMixin, object):
 
-    def __init__(self, base_url=None, auth=None, format=None, append_slash=True, session=None):
+    def __init__(self, base_url=None, auth=None, format=None, append_slash=True, session=None, serializer=None):
+        if serializer is None:
+            s = Serializer(default=format)
+
         self._store = {
             "base_url": base_url,
             "format": format if format is not None else "json",
             "append_slash": append_slash,
             "session": requests.session(auth=auth) if session is None else session,
+            "serializer": s,
         }
 
         # Do some Checks for Required Values

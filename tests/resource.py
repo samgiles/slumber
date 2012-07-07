@@ -2,15 +2,13 @@ import mock
 import unittest
 import requests
 import slumber
+import slumber.serialize
 
 
 class ResourceTestCase(unittest.TestCase):
 
     def setUp(self):
         self.base_resource = slumber.Resource(base_url="http://example/api/v1/test", format="json", append_slash=False)
-
-    def test_get_serializer(self):
-        self.assertTrue(isinstance(self.base_resource.get_serializer(), slumber.Serializer))
 
     def test_request_200(self):
         r = mock.Mock(spec=requests.Response)
@@ -19,6 +17,7 @@ class ResourceTestCase(unittest.TestCase):
 
         self.base_resource._store.update({
             "session": mock.Mock(spec=requests.Session),
+            "serializer": slumber.serialize.Serializer(),
         })
         self.base_resource._store["session"].request.return_value = r
 
@@ -32,5 +31,5 @@ class ResourceTestCase(unittest.TestCase):
             "http://example/api/v1/test",
             data=None,
             params=None,
-            headers={"content-type": self.base_resource.get_serializer().get_content_type(), "accept": self.base_resource.get_serializer().get_content_type()}
+            headers={"content-type": self.base_resource._store["serializer"].get_content_type(), "accept": self.base_resource._store["serializer"].get_content_type()}
         )
