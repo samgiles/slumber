@@ -102,6 +102,8 @@ class Resource(ResourceAttributesMixin, object):
         elif 500 <= resp.status_code <= 599:
             raise exceptions.HttpServerError("Server Error %s: %s" % (resp.status_code, url), response=resp, content=resp.content)
 
+        self._ = resp
+
         return resp
 
     def get(self, **kwargs):
