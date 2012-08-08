@@ -91,14 +91,21 @@ class Resource(ResourceAttributesMixin, object):
     def get_serializer(self):
         return Serializer(default_format=self._store["format"])
 
-    def _request(self, method, data=None, params=None):
+    def _request(self, method, data=None, params=None, files=None):
         s = self.get_serializer()
         url = self._store["base_url"]
 
         if self._store["append_slash"] and not url.endswith("/"):
             url = url + "/"
 
-        resp = self._store["session"].request(method, url, data=data, params=params, headers={"content-type": s.get_content_type(), "accept": s.get_content_type()})
+        headers = {
+            'accept': s.get_content_type()
+        }
+        if not files:
+            # files imply a content-type of multipart/form-data
+            headers['content-type'] = s.get_content_type()
+
+        resp = self._store["session"].request(method, url, data=data, params=params, files=files, headers=headers)
 
         if 400 <= resp.status_code <= 499:
             raise exceptions.HttpClientError("Client Error %s: %s" % (resp.status_code, url), response=resp, content=resp.content)
@@ -106,6 +113,17 @@ class Resource(ResourceAttributesMixin, object):
             raise exceptions.HttpServerError("Server Error %s: %s" % (resp.status_code, url), response=resp, content=resp.content)
 
         return resp
+
+    def _extract_files(self, d):
+        """
+        Remove file-like objects from d and return them in a dictionary.
+        """
+        files = {}
+        for k in d.keys():
+            if callable(getattr(d[k], 'read', None)):
+                files[k] = d[k]
+                del d[k]
+        return files
 
     def get(self, **kwargs):
         s = self.get_serializer()
@@ -122,7 +140,11 @@ class Resource(ResourceAttributesMixin, object):
     def post(self, data, **kwargs):
         s = self.get_serializer()
 
-        resp = self._request("POST", data=s.dumps(data), params=kwargs)
+        files = self._extract_files(data)
+        # Files require data to be in a dictionary, not string
+        if not files:
+            data = s.dumps(data)
+        resp = self._request("POST", data=data, params=kwargs, files=files)
         if 200 <= resp.status_code <= 299:
             if resp.status_code == 201:
                 # @@@ Hacky, see description in __call__
@@ -137,7 +159,11 @@ class Resource(ResourceAttributesMixin, object):
     def put(self, data, **kwargs):
         s = self.get_serializer()
 
-        resp = self._request("PUT", data=s.dumps(data), params=kwargs)
+        files = self._extract_files(data)
+        # Files require data to be in a dictionary, not string
+        if not files:
+            data = s.dumps(data)
+        resp = self._request("PUT", data=data, params=kwargs, files=files)
         if 200 <= resp.status_code <= 299:
             if resp.status_code == 204:
                 return True
