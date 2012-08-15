@@ -168,7 +168,7 @@ class Resource(ResourceAttributesMixin, object):
             if resp.status_code == 204:
                 return True
             else:
-                return True  # @@@ Should this really be True?
+                return resp.content
         else:
             return False
 
