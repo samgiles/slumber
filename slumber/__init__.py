@@ -106,17 +106,25 @@ class Resource(ResourceAttributesMixin, object):
 
         return resp
 
-    def get(self, **kwargs):
+    def _handle_redirect(self, resp, **kwargs):
+        # @@@ Hacky, see description in __call__
+        resource_obj = self(url_override=resp.headers["location"])
+        return resource_obj.get(params=kwargs)
+
+    def _try_to_serialize_response(self, resp):
         s = self._store["serializer"]
 
+        try:
+            stype = s.get_serializer(content_type=resp.headers.get("content-type"))
+        except exceptions.SerializerNotAvailable:
+            return resp.content
+
+        return stype.loads(resp.content)
+
+    def get(self, **kwargs):
         resp = self._request("GET", params=kwargs)
         if 200 <= resp.status_code <= 299:
-            try:
-                stype = s.get_serializer(content_type=resp.headers.get("content-type"))
-            except exceptions.SerializerNotAvailable:
-                return resp.content
-
-            return stype.loads(resp.content)
+            return self._try_to_serialize_response(resp)
         else:
             return  # @@@ We should probably do some sort of error here? (Is this even possible?)
 
@@ -125,17 +133,7 @@ class Resource(ResourceAttributesMixin, object):
 
         resp = self._request("POST", data=s.dumps(data), params=kwargs)
         if 200 <= resp.status_code <= 299:
-            if resp.headers.get("location"):
-                # @@@ Hacky, see description in __call__
-                resource_obj = self(url_override=resp.headers["location"])
-                return resource_obj.get(params=kwargs)
-            else:
-                try:
-                    stype = s.get_serializer(content_type=resp.headers.get("content-type"))
-                except exceptions.SerializerNotAvailable:
-                    return resp.content
-
-                return stype.loads(resp.content)
+            return self._try_to_serialize_response(resp)
         else:
             # @@@ Need to be Some sort of Error Here or Something
             return
@@ -145,17 +143,7 @@ class Resource(ResourceAttributesMixin, object):
 
         resp = self._request("PATCH", data=s.dumps(data), params=kwargs)
         if 200 <= resp.status_code <= 299:
-            if resp.headers.get("location"):
-                # @@@ Hacky, see description in __call__
-                resource_obj = self(url_override=resp.headers["location"])
-                return resource_obj.get(params=kwargs)
-            else:
-                try:
-                    stype = s.get_serializer(content_type=resp.headers.get("content-type"))
-                except exceptions.SerializerNotAvailable:
-                    return resp.content
-
-                return stype.loads(resp.content)
+            return self._try_to_serialize_response(resp)
         else:
             # @@@ Need to be Some sort of Error Here or Something
             return
@@ -165,10 +153,7 @@ class Resource(ResourceAttributesMixin, object):
 
         resp = self._request("PUT", data=s.dumps(data), params=kwargs)
         if 200 <= resp.status_code <= 299:
-            if resp.status_code == 204:
-                return True
-            else:
-                return resp.content
+            return self._try_to_serialize_response(resp)
         else:
             return False
 
