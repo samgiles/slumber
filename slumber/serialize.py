@@ -21,13 +21,13 @@ except ImportError:
 
 class BaseSerializer(object):
 
-    content_type = None
+    content_types = None
     key = None
 
     def get_content_type(self):
-        if self.content_type is None:
+        if self.content_types is None:
             raise NotImplementedError()
-        return self.content_type
+        return self.content_types[0]
 
     def loads(self, data):
         raise NotImplementedError()
@@ -38,7 +38,13 @@ class BaseSerializer(object):
 
 class JsonSerializer(BaseSerializer):
 
-    content_type = "application/json"
+    content_types = [
+                        "application/json",
+                        "application/x-javascript",
+                        "text/javascript",
+                        "text/x-javascript",
+                        "text/x-json",
+                    ]
     key = "json"
 
     def loads(self, data):
@@ -50,7 +56,7 @@ class JsonSerializer(BaseSerializer):
 
 class YamlSerializer(BaseSerializer):
 
-    content_type = "text/yaml"
+    content_types = ["text/yaml"]
     key = "yaml"
 
     def loads(self, data):
@@ -88,9 +94,10 @@ class Serializer(object):
             return self.serializers[name]
         else:
             for x in self.serializers.values():
-                if content_type == x.get_content_type():
-                    return x
-            raise exceptions.SerializerNotAvailable("%s is not an available serializer" % name)
+                for ctype in x.content_types:
+                    if content_type == ctype:
+                        return x
+            raise exceptions.SerializerNotAvailable("%s is not an available serializer" % content_type)
 
     def loads(self, data, format=None):
         s = self.get_serializer(format)
