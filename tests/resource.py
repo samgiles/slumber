@@ -74,7 +74,7 @@ class ResourceTestCase(unittest.TestCase):
 
         r2 = mock.Mock(spec=requests.Response)
         r2.status_code = 200
-        r2.headers = {}
+        r2.headers = {"content-type": "application/json"}
         r2.content = '{"result": ["a", "b", "c"]}'
 
         self.base_resource._store.update({
@@ -103,7 +103,7 @@ class ResourceTestCase(unittest.TestCase):
         r = mock.Mock(spec=requests.Response)
         r.status_code = 200
         r.content = '{"result": ["a", "b", "c"]}'
-        r.headers = {}
+        r.headers = {"content-type": "application/json"}
 
         self.base_resource._store.update({
             "session": mock.Mock(spec=requests.Session),
@@ -135,7 +135,7 @@ class ResourceTestCase(unittest.TestCase):
 
         r2 = mock.Mock(spec=requests.Response)
         r2.status_code = 200
-        r2.headers = {}
+        r2.headers = {"content-type": "application/json"}
         r2.content = '{"result": ["a", "b", "c"]}'
 
         self.base_resource._store.update({
@@ -164,7 +164,7 @@ class ResourceTestCase(unittest.TestCase):
         r = mock.Mock(spec=requests.Response)
         r.status_code = 200
         r.content = '{"result": ["a", "b", "c"]}'
-        r.headers = {}
+        r.headers = {"content-type": "application/json"}
 
         self.base_resource._store.update({
             "session": mock.Mock(spec=requests.Session),
@@ -196,7 +196,7 @@ class ResourceTestCase(unittest.TestCase):
 
         r2 = mock.Mock(spec=requests.Response)
         r2.status_code = 200
-        r2.headers = {}
+        r2.headers = {"content-type": "application/json"}
         r2.content = '{"result": ["a", "b", "c"]}'
 
         self.base_resource._store.update({
@@ -225,7 +225,7 @@ class ResourceTestCase(unittest.TestCase):
         r = mock.Mock(spec=requests.Response)
         r.status_code = 200
         r.content = '{"result": ["a", "b", "c"]}'
-        r.headers = {}
+        r.headers = {"content-type": "application/json"}
 
         self.base_resource._store.update({
             "session": mock.Mock(spec=requests.Session),
@@ -248,3 +248,17 @@ class ResourceTestCase(unittest.TestCase):
 
         resp = self.base_resource.put(data={'foo': 'bar'})
         self.assertEqual(resp['result'], ['a', 'b', 'c'])
+
+    def test_handle_serialization(self):
+        self.base_resource._store.update({
+            "serializer": slumber.serialize.Serializer(),
+        })
+
+        resp = mock.Mock(spec=requests.Response)
+        resp.headers = {"content-type": "application/json; charset=utf-8"}
+        resp.content = '{"foo": "bar"}'
+
+        r = self.base_resource._try_to_serialize_response(resp)
+
+        if not isinstance(r, dict):
+            self.fail("Serialization did not take place")

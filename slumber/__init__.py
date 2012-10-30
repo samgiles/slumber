@@ -114,12 +114,17 @@ class Resource(ResourceAttributesMixin, object):
     def _try_to_serialize_response(self, resp):
         s = self._store["serializer"]
 
-        try:
-            stype = s.get_serializer(content_type=resp.headers.get("content-type"))
-        except exceptions.SerializerNotAvailable:
-            return resp.content
+        if resp.headers.get("content-type", None):
+            content_type = resp.headers.get("content-type").split(";")[0].strip()
 
-        return stype.loads(resp.content)
+            try:
+                stype = s.get_serializer(content_type=content_type)
+            except exceptions.SerializerNotAvailable:
+                return resp.content
+
+            return stype.loads(resp.content)
+        else:
+            return resp.content
 
     def get(self, **kwargs):
         resp = self._request("GET", params=kwargs)
