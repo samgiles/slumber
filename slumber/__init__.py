@@ -177,14 +177,14 @@ class API(ResourceAttributesMixin, object):
 
     def __init__(self, base_url=None, auth=None, format=None, append_slash=True, session=None, serializer=None):
         if serializer is None:
-            s = Serializer(default=format)
+            serializer = Serializer(default=format)
 
         self._store = {
             "base_url": base_url,
             "format": format if format is not None else "json",
             "append_slash": append_slash,
             "session": requests.session(auth=auth) if session is None else session,
-            "serializer": s,
+            "serializer": serializer,
         }
 
         # Do some Checks for Required Values
