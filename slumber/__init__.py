@@ -179,11 +179,15 @@ class API(ResourceAttributesMixin, object):
         if serializer is None:
             s = Serializer(default=format)
 
+        if session is None:
+            session = requests.session()
+            session.auth = auth
+
         self._store = {
             "base_url": base_url,
             "format": format if format is not None else "json",
             "append_slash": append_slash,
-            "session": requests.session(auth=auth) if session is None else session,
+            "session": session,
             "serializer": s,
         }
 
