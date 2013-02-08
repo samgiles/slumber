@@ -41,7 +41,7 @@ class ResourceTestCase(unittest.TestCase):
     def test_get_200_text(self):
         r = mock.Mock(spec=requests.Response)
         r.status_code = 200
-        r.headers = {"content-type": "text/text"}
+        r.headers = {"content-type": "text/plain"}
         r.content = "Mocked Content"
 
         self.base_resource._store.update({
