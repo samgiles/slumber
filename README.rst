@@ -11,9 +11,8 @@ and processing requests.
 Getting Help
 ============
 
-There are two primary ways of getting help. I have an IRC channel
-(`#slumber on irc.freenode.net`_) to get help, want to bounce idea or
-generally shoot the breeze.
+I have an IRC channel (`#slumber on irc.freenode.net`_) to get help, bounce idea
+or generally shoot the breeze.
 
 .. _#slumber on irc.freenode.net: irc://irc.freenode.net/slumber
 
