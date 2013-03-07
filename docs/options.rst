@@ -35,7 +35,8 @@ File uploads
 You may upload files by supplying a file-like object as the value of the
 dictionary you ``post`` or ``put`` with.  E.g.::
 
-    api.file.post({'name': 'my file', 'file': open('/home/philip/out.txt')}) 
+    with open('/home/philip/out.txt') as fp:
+        api.file.post({'name': 'my file', 'file': fp}) 
 
 Will do a POST to ``/api/file/`` with a multipart-form-data request.
 
