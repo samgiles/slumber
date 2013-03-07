@@ -178,7 +178,12 @@ class Resource(ResourceAttributesMixin, object):
         s = self._store["serializer"]
 
         files = self._extract_files(data)
-        resp = self._request("PUT", data=s.dumps(data), params=kwargs, files=files)
+
+        if not files:
+            s.dumps(data)
+            
+        resp = self._request("PUT", data=data, params=kwargs, files=files)
+
         if 200 <= resp.status_code <= 299:
             return self._try_to_serialize_response(resp)
         else:
