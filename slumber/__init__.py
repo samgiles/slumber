@@ -155,7 +155,7 @@ class Resource(ResourceAttributesMixin, object):
         files = self._extract_files(data)
         
         if not files:
-            s.dumps(data)
+            data = s.dumps(data)
 
         resp = self._request("POST", data=data, params=kwargs, files=files)
         if 200 <= resp.status_code <= 299:
@@ -180,7 +180,7 @@ class Resource(ResourceAttributesMixin, object):
         files = self._extract_files(data)
 
         if not files:
-            s.dumps(data)
+            data = s.dumps(data)
             
         resp = self._request("PUT", data=data, params=kwargs, files=files)
 
