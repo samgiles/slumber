@@ -88,14 +88,19 @@ class Resource(ResourceAttributesMixin, object):
 
         return self.__class__(**kwargs)
 
-    def _request(self, method, data=None, params=None):
+    def _request(self, method, data=None, params=None, files=None):
         s = self._store["serializer"]
         url = self._store["base_url"]
 
         if self._store["append_slash"] and not url.endswith("/"):
             url = url + "/"
 
-        resp = self._store["session"].request(method, url, data=data, params=params, headers={"content-type": s.get_content_type(), "accept": s.get_content_type()})
+        headers = {"accept": s.get_content_type()}
+
+        if not files:
+            headers["content-type"] = s.get_content_type()
+
+        resp = self._store["session"].request(method, url, data=data, params=params, files=files, headers=headers)
 
         if 400 <= resp.status_code <= 499:
             raise exceptions.HttpClientError("Client Error %s: %s" % (resp.status_code, url), response=resp, content=resp.content)
@@ -126,6 +131,17 @@ class Resource(ResourceAttributesMixin, object):
         else:
             return resp.content
 
+    def _extract_files(self, d):
+        """
+        Remove file-like objects from d and return them in a dictionary.
+        """
+        files = {}
+        for k in d.keys():
+            if callable(getattr(d[k], 'read', None)):
+                files[k] = d[k]
+                del d[k]
+        return files
+
     def get(self, **kwargs):
         resp = self._request("GET", params=kwargs)
         if 200 <= resp.status_code <= 299:
@@ -136,7 +152,12 @@ class Resource(ResourceAttributesMixin, object):
     def post(self, data, **kwargs):
         s = self._store["serializer"]
 
-        resp = self._request("POST", data=s.dumps(data), params=kwargs)
+        files = self._extract_files(data)
+        
+        if not files:
+            s.dumps(data)
+
+        resp = self._request("POST", data=data, params=kwargs, files=files)
         if 200 <= resp.status_code <= 299:
             return self._try_to_serialize_response(resp)
         else:
@@ -156,7 +177,8 @@ class Resource(ResourceAttributesMixin, object):
     def put(self, data, **kwargs):
         s = self._store["serializer"]
 
-        resp = self._request("PUT", data=s.dumps(data), params=kwargs)
+        files = self._extract_files(data)
+        resp = self._request("PUT", data=s.dumps(data), params=kwargs, files=files)
         if 200 <= resp.status_code <= 299:
             return self._try_to_serialize_response(resp)
         else:

@@ -29,6 +29,17 @@ To Use Digest or OAuth please consult the requests documentation. The auth
 argument is passed directly to requests and thus works exactly the same way
 and accepts exactly the same arguments.
 
+File uploads
+============
+
+You may upload files by supplying a file-like object as the value of the
+dictionary you ``post`` or ``put`` with.  E.g.::
+
+    api.file.post({'name': 'my file', 'file': open('/home/philip/out.txt')}) 
+
+Will do a POST to ``/api/file/`` with a multipart-form-data request.
+
+
 Serializer
 ==========
 
