@@ -88,7 +88,7 @@ class Resource(ResourceAttributesMixin, object):
 
         return self.__class__(**kwargs)
 
-    def _request(self, method, data=None, params=None, files=None):
+    def _request(self, method, data=None, files=None, params=None):
         s = self._store["serializer"]
         url = self._store["base_url"]
 
@@ -99,6 +99,8 @@ class Resource(ResourceAttributesMixin, object):
 
         if not files:
             headers["content-type"] = s.get_content_type()
+            if data is not None:
+                data = s.dumps(data)
 
         resp = self._store["session"].request(method, url, data=data, params=params, files=files, headers=headers)
 
@@ -131,17 +133,6 @@ class Resource(ResourceAttributesMixin, object):
         else:
             return resp.content
 
-    def _extract_files(self, d):
-        """
-        Remove file-like objects from d and return them in a dictionary.
-        """
-        files = {}
-        for k in d.keys():
-            if callable(getattr(d[k], 'read', None)):
-                files[k] = d[k]
-                del d[k]
-        return files
-
     def get(self, **kwargs):
         resp = self._request("GET", params=kwargs)
         if 200 <= resp.status_code <= 299:
@@ -149,40 +140,28 @@ class Resource(ResourceAttributesMixin, object):
         else:
             return  # @@@ We should probably do some sort of error here? (Is this even possible?)
 
-    def post(self, data, **kwargs):
+    def post(self, data=None, files=None, **kwargs):
         s = self._store["serializer"]
 
-        files = self._extract_files(data)
-        
-        if not files:
-            data = s.dumps(data)
-
-        resp = self._request("POST", data=data, params=kwargs, files=files)
+        resp = self._request("POST", data=data, files=files, params=kwargs)
         if 200 <= resp.status_code <= 299:
             return self._try_to_serialize_response(resp)
         else:
             # @@@ Need to be Some sort of Error Here or Something
             return
 
-    def patch(self, data, **kwargs):
+    def patch(self, data=None, files=None, **kwargs):
         s = self._store["serializer"]
 
-        resp = self._request("PATCH", data=s.dumps(data), params=kwargs)
+        resp = self._request("PATCH", data=data, files=files, params=kwargs)
         if 200 <= resp.status_code <= 299:
             return self._try_to_serialize_response(resp)
         else:
             # @@@ Need to be Some sort of Error Here or Something
             return
 
-    def put(self, data, **kwargs):
-        s = self._store["serializer"]
-
-        files = self._extract_files(data)
-
-        if not files:
-            data = s.dumps(data)
-            
-        resp = self._request("PUT", data=data, params=kwargs, files=files)
+    def put(self, data=None, files=None, **kwargs):
+        resp = self._request("PUT", data=data, files=files, params=kwargs)
 
         if 200 <= resp.status_code <= 299:
             return self._try_to_serialize_response(resp)
