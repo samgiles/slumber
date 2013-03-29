@@ -35,9 +35,9 @@ Requirements
 
 Slumber requires the following modules.
 
-* Python 2.5+
+* Python 2.6+
 * requests
-* simplejson (If using Python 2.5, or you desire the speedups for JSON serialization)
+* simplejson (If you desire the speedups for JSON serialization)
 * pyyaml (If you are using the optional yaml serialization)
 
 .. _Pip: http://pip.openplans.org/

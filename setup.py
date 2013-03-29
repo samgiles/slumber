@@ -4,9 +4,6 @@ import sys
 
 install_requires = ["requests"]
 
-if sys.version_info < (2, 6):
-    install_requires.append("simplejson")
-
 base_dir = os.path.dirname(os.path.abspath(__file__))
 
 setup(
