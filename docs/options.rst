@@ -32,10 +32,11 @@ and accepts exactly the same arguments.
 File uploads
 ============
 
-You may upload files by supplying a file-like object as the value of the
-dictionary you ``post`` or ``put`` with.  E.g.::
+You may upload files by supplying a dictionary in the form {'key': file-like-object} as the value of the
+``files`` parameter in ``post``, ``patch`` or ``put`` calls.  E.g.::
 
-    api.file.post({'name': 'my file', 'file': open('/home/philip/out.txt')}) 
+    with open('/home/philip/out.txt') as fp:
+        api.file.post({'name': 'my file'}, files={'file': fp}) 
 
 Will do a POST to ``/api/file/`` with a multipart-form-data request.
 

@@ -36,7 +36,7 @@ which you can see at http://slumber.in/api/v1/.
 
     >>> import slumber
     >>> ## Connect to http://slumber.in/api/v1/ with the Basic Auth user/password of demo/demo
-    >>> api = slumber.API("http://slumber.in/api/v1/", auth=("demo", "demo")
+    >>> api = slumber.API("http://slumber.in/api/v1/", auth=("demo", "demo"))
     >>> ## GET http://slumber.in/api/v1/note/
     >>> ##     Note: Any kwargs passed to get(), post(), put(), delete() will be used as url parameters
     >>> api.note.get()
