@@ -1,4 +1,5 @@
+dist/*
 docs/_build/*
 .tox
 *.pyc
-*.egg-info
+slumber.egg-info

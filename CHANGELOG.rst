@@ -3,6 +3,21 @@
 Changelog
 =========
 
+0.6.0
+-----
+
+* All HTTP methods support multipart/form-data.  The new ``files``
+  parameter is directly passed to ``requests``.  Thanks to Philip
+  Neustrom and Diego Gaustein.
+
+
+0.5.2
+-----
+
+* Now compatible with ``requests`` 1.0 thanks to Matias Saguir.
+
+* Fix bug when using default serializer.  Thanks to Andy McKay
+
 
 0.4.2
 -----

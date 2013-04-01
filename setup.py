@@ -1,6 +1,5 @@
-import os.path
-from setuptools import setup, find_packages
-import sys
+import os
+from setuptools import setup
 
 install_requires = ["requests"]
 
@@ -17,7 +16,7 @@ setup(
     url = "http://slumber.in/",
     author = "Donald Stufft",
     author_email = "donald.stufft@gmail.com",
-    packages = find_packages(),
+    packages = ["slumber"],
     zip_safe = False,
     install_requires = install_requires,
     test_suite = "tests.get_tests",
