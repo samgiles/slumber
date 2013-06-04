@@ -329,6 +329,7 @@ class ResourceTestCase(unittest.TestCase):
         })
 
         resp = mock.Mock(spec=requests.Response)
+        resp.status_code = 200
         resp.headers = {"content-type": "application/json; charset=utf-8"}
         resp.content = '{"foo": "bar"}'
 
@@ -336,6 +337,21 @@ class ResourceTestCase(unittest.TestCase):
 
         if not isinstance(r, dict):
             self.fail("Serialization did not take place")
+
+    def test_post_204_json(self):
+        resp = mock.Mock(spec=requests.Response)
+        resp.status_code = 204
+        resp.headers = {"content-type": "application/json"}
+        resp.content = None
+
+        self.base_resource._store.update({
+            "session": mock.Mock(spec=requests.Session),
+            "serializer": slumber.serialize.Serializer(),
+        })
+
+        self.base_resource._store["session"].request.return_value = resp
+
+        self.assertEqual(self.base_resource.post(), None)
 
     def test_get_200_subresource_json(self):
         r = mock.Mock(spec=requests.Response)
@@ -380,10 +396,12 @@ class ResourceTestCase(unittest.TestCase):
             "session": mock.Mock(spec=requests.Session),
             "serializer": slumber.serialize.Serializer(),
         })
+
         self.base_resource._store["session"].request.return_value = r
 
         with self.assertRaises(exceptions.HttpClientError):
             self.base_resource.req._request("GET")
+
 
     def test_get_404_response(self):
         r = mock.Mock(spec=requests.Response)
