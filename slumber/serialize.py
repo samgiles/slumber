@@ -6,12 +6,9 @@ _SERIALIZERS = {
 }
 
 try:
-    import simplejson as json
+    import json
 except ImportError:
-    try:
-        import json
-    except ImportError:
-        _SERIALIZERS["json"] = False
+    _SERIALIZERS["json"] = False
 
 try:
     import yaml
