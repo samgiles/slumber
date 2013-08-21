@@ -24,6 +24,12 @@ class HttpClientError(SlumberHttpBaseException):
     """
 
 
+class Http404Error(HttpClientError):
+    """
+    Called when the server sends a 404 error.
+    """
+
+
 class HttpServerError(SlumberHttpBaseException):
     """
     Called when the server tells us there was a server error (5xx).
