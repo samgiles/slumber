@@ -25,6 +25,21 @@ You supply the username and password (for Basic Auth) like::
 
 And slumber will attempt to use those credentials with each request.
 
+With Tastypie ApikeyAuthentication you can use::
+
+    from requests.auth import AuthBase
+    
+    class TastypieApikeyAuth(AuthBase):
+        def __init__(self, username, apikey):
+            self.username = username
+            self.apikey = apikey
+
+        def __call__(self, r):
+            r.headers['Authorization'] = "ApiKey {0}:{1}".format(self.username, self.apikey)
+            return r
+
+    api = slumber.API("http://path/to/my/api/", auth=TastypieApikeyAuth("myuser", "mypass"))
+
 To Use Digest or OAuth please consult the requests documentation. The auth
 argument is passed directly to requests and thus works exactly the same way
 and accepts exactly the same arguments.
