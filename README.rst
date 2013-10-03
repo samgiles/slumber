@@ -1,17 +1,17 @@
 Slumber
 =======
 
-Slumber is a python library that provides a convenient yet powerful object
-orientated interface to ReSTful APIs. It acts as a wrapper around the
-excellent requests_ library and abstracts away the handling of urls, serialization,
-and processing requests.
+Slumber is a Python library that provides a convenient yet powerful
+object-oriented interface to ReSTful APIs. It acts as a wrapper around the
+excellent requests_ library and abstracts away the handling of URLs, serialization,
+and request processing.
 
 .. _requests: http://python-requests.org/
 
 Getting Help
 ============
 
-I have an IRC channel (`#slumber on irc.freenode.net`_) to get help, bounce idea
+Visit IRC channel (`#slumber on irc.freenode.net`_) to get help, bounce ideas
 or generally shoot the breeze.
 
 .. _#slumber on irc.freenode.net: irc://irc.freenode.net/slumber
@@ -36,7 +36,7 @@ Slumber requires the following modules.
 
 * Python 2.6+
 * requests
-* pyyaml (If you are using the optional yaml serialization)
+* pyyaml (If you are using the optional YAML serialization)
 
 .. _Pip: http://pip.openplans.org/
 
