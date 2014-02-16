@@ -2,6 +2,7 @@ import os
 from setuptools import setup
 
 install_requires = ["requests"]
+tests_require = ["mock"]
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -19,5 +20,6 @@ setup(
     packages = ["slumber"],
     zip_safe = False,
     install_requires = install_requires,
+    tests_require = tests_require,
     test_suite = "tests.get_tests",
 )
