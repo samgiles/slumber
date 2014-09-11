@@ -1,5 +1,5 @@
-Slumber
-=======
+Slumber |build-status| |coverage-status| |docs|
+===============================================
 
 Slumber is a Python library that provides a convenient yet powerful
 object-oriented interface to ReSTful APIs. It acts as a wrapper around the
@@ -38,5 +38,12 @@ Slumber requires the following modules.
 * requests
 * pyyaml (If you are using the optional YAML serialization)
 
-.. _Pip: http://pip.openplans.org/
-
+.. |build-status| image:: https://travis-ci.org/dstufft/slumber.svg?branch=master
+   :target: https://travis-ci.org/dstufft/slumber
+   :alt: Build status
+.. |coverage-status| image:: https://img.shields.io/coveralls/dstufft/slumber.svg
+   :target: https://coveralls.io/r/dstufft/slumber
+   :alt: Test coverage percentage
+.. |docs| image:: https://readthedocs.org/projects/slumber/badge/?version=latest
+   :target: http://edx.readthedocs.org/projects/slumber
+   :alt: Documentation
