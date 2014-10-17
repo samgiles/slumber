@@ -38,12 +38,12 @@ Slumber requires the following modules.
 * requests
 * pyyaml (If you are using the optional YAML serialization)
 
-.. |build-status| image:: https://travis-ci.org/dstufft/slumber.svg?branch=master
-   :target: https://travis-ci.org/dstufft/slumber
+.. |build-status| image:: https://travis-ci.org/samgiles/slumber.svg?branch=master
+   :target: https://travis-ci.org/samgiles/slumber
    :alt: Build status
-.. |coverage-status| image:: https://img.shields.io/coveralls/dstufft/slumber.svg
-   :target: https://coveralls.io/r/dstufft/slumber
+.. |coverage-status| image:: https://img.shields.io/coveralls/samgiles/slumber.svg
+   :target: https://coveralls.io/r/samgiles/slumber
    :alt: Test coverage percentage
 .. |docs| image:: https://readthedocs.org/projects/slumber/badge/?version=latest
-   :target: http://edx.readthedocs.org/projects/slumber
+   :target: http://slumber.readthedocs.org/
    :alt: Documentation
