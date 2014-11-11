@@ -7,6 +7,13 @@ Changelog
 development version
 -------------------
 
+0.6.1
+-----
+
+* Remove ``simplejson`` dependency.
+
+* Support range now Python 2.6 - Python 3.4
+
 
 0.6.0
 -----
