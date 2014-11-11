@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
+import sys
 
-import unittest
+import unittest2 as unittest
 import slumber
 
 
@@ -47,6 +48,7 @@ class UtilsTestCase(unittest.TestCase):
         self.assertEqual(slumber.url_join("http://example.com/", "test/"), "http://example.com/test/")
         self.assertEqual(slumber.url_join("http://example.com/", "test/", "example/"), "http://example.com/test/example/")
 
+    @unittest.skipIf(sys.version_info > (2, 7), "need a separate test for py3")
     def test_url_join_encoded_unicode(self):
         expected = "http://example.com/tǝst/"
 
@@ -56,6 +58,7 @@ class UtilsTestCase(unittest.TestCase):
         url = slumber.url_join("http://example.com/", "tǝst/".decode('utf8').encode('utf8'))
         self.assertEqual(url, expected)
 
+    @unittest.skipIf(sys.version_info > (2, 7), "need a separate test for py3")
     def test_url_join_decoded_unicode(self):
         url = slumber.url_join("http://example.com/", "tǝst/".decode('utf8'))
         expected = "http://example.com/tǝst/".decode('utf8')
