@@ -1,4 +1,3 @@
-import posixpath
 import requests
 
 try:
@@ -6,20 +5,11 @@ try:
 except ImportError:
     from urlparse import urlparse, urlsplit, urlunsplit
 
-from slumber import exceptions
-from slumber.serialize import Serializer
+from . import exceptions
+from .serialize import Serializer
+from .utils import url_join, iterator
 
 __all__ = ["Resource", "API"]
-
-
-def url_join(base, *args):
-    """
-    Helper function to join an arbitrary number of url segments together.
-    """
-    scheme, netloc, path, query, fragment = urlsplit(base)
-    path = path if len(path) else "/"
-    path = posixpath.join(path, *[('%s' % x) for x in args])
-    return urlunsplit([scheme, netloc, path, query, fragment])
 
 
 class ResourceAttributesMixin(object):
@@ -37,7 +27,7 @@ class ResourceAttributesMixin(object):
             raise AttributeError(item)
 
         kwargs = {}
-        for key, value in self._store.iteritems():
+        for key, value in iterator(self._store):
             kwargs[key] = value
 
         kwargs.update({"base_url": url_join(self._store["base_url"], item)})
@@ -72,7 +62,7 @@ class Resource(ResourceAttributesMixin, object):
             return self
 
         kwargs = {}
-        for key, value in self._store.iteritems():
+        for key, value in iterator(self._store):
             kwargs[key] = value
 
         if id is not None:

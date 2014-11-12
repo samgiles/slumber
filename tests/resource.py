@@ -1,8 +1,11 @@
+import sys
 import mock
-import unittest
 import requests
 import slumber
 import slumber.serialize
+import unittest2 as unittest
+
+from slumber import exceptions
 
 
 class ResourceTestCase(unittest.TestCase):
@@ -270,3 +273,82 @@ class ResourceTestCase(unittest.TestCase):
 
         if not isinstance(r, dict):
             self.fail("Serialization did not take place")
+
+    def test_get_200_subresource_json(self):
+        r = mock.Mock(spec=requests.Response)
+        r.status_code = 200
+        r.headers = {"content-type": "application/json"}
+        r.content = '{"result": ["a", "b", "c"]}'
+
+        self.base_resource._store.update({
+            "session": mock.Mock(spec=requests.Session),
+            "serializer": slumber.serialize.Serializer(),
+        })
+        self.base_resource._store["session"].request.return_value = r
+
+        resp = self.base_resource.subresource._request("GET")
+
+        self.assertTrue(resp is r)
+        self.assertEqual(resp.content, r.content)
+
+        self.base_resource._store["session"].request.assert_called_once_with(
+            "GET",
+            "http://example/api/v1/test/subresource",
+            data=None,
+            files=None,
+            params=None,
+            headers={"content-type": self.base_resource._store["serializer"].get_content_type(), "accept": self.base_resource._store["serializer"].get_content_type()}
+        )
+
+        resp = self.base_resource.get()
+        self.assertEqual(resp['result'], ['a', 'b', 'c'])
+
+    def test_bad_resource_name(self):
+        with self.assertRaises(AttributeError):
+            self.base_resource._subresource
+
+    def test_get_400_response(self):
+        r = mock.Mock(spec=requests.Response)
+        r.status_code = 400
+        r.headers = {"content-type": "application/json"}
+        r.content = ''
+
+        self.base_resource._store.update({
+            "session": mock.Mock(spec=requests.Session),
+            "serializer": slumber.serialize.Serializer(),
+        })
+        self.base_resource._store["session"].request.return_value = r
+
+        with self.assertRaises(exceptions.HttpClientError):
+            self.base_resource.req._request("GET")
+
+    def test_get_500_response(self):
+        r = mock.Mock(spec=requests.Response)
+        r.status_code = 500
+        r.headers = {"content-type": "application/json"}
+        r.content = ''
+
+        self.base_resource._store.update({
+            "session": mock.Mock(spec=requests.Session),
+            "serializer": slumber.serialize.Serializer(),
+        })
+        self.base_resource._store["session"].request.return_value = r
+
+        with self.assertRaises(exceptions.HttpServerError):
+            self.base_resource.req._request("GET")
+
+    def test_improperly_conf(self):
+        with self.assertRaises(exceptions.ImproperlyConfigured):
+            client = slumber.API()
+
+    def test_api(self):
+        r = mock.Mock(spec=requests.Response)
+        r.status_code = 200
+        r.headers = {"content-type": "application/json"}
+        r.content = '{"result": ["a", "b", "c"]}'
+
+        client = slumber.API(base_url="http://example/api/v1", session=mock.Mock(spec=requests.Session))
+        client.test._store["session"].request.return_value = r
+        resp = client.test.get()
+
+        self.assertEqual(resp['result'], ['a', 'b', 'c'])
