@@ -1,4 +1,5 @@
 import os
+import sys
 from setuptools import setup
 
 install_requires = ["requests"]
