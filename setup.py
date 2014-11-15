@@ -6,9 +6,16 @@ tests_require = ["mock"]
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 
+version = "0.6.2"
+
+if sys.argv[-1] == 'publish':
+    os.system("git tag -a %s -m 'v%s'" % (version, version))
+    os.system("python setup.py sdist bdist_wheel upload -r pypi")
+    print("Published version %s, do `git push --tags` to push new tag to remote" % version)
+
 setup(
     name = "slumber",
-    version = "0.6.1",
+    version = version,
     description = "A library that makes consuming a REST API easier and more convenient",
     long_description="\n\n".join([
         open(os.path.join(base_dir, "README.rst"), "r").read(),

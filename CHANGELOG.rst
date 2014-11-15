@@ -7,6 +7,11 @@ Changelog
 development version
 -------------------
 
+0.6.2
+-----
+
+* Further Python 3 compatibility fixes, many thanks to Alexander Shchepetilnikov (irqed)
+
 0.6.1
 -----
 
