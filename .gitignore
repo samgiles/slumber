@@ -4,3 +4,4 @@ docs/_build/*
 *.pyc
 slumber.egg-info
 build/
+.coverage

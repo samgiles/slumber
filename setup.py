@@ -15,6 +15,10 @@ if sys.argv[-1] == 'publish':
     print("Published version %s, do `git push --tags` to push new tag to remote" % version)
     sys.exit()
 
+if sys.argv[-1] == 'syncci':
+    os.system("panci --to=tox .travis.yml > tox.ini");
+    sys.exit();
+
 setup(
     name = "slumber",
     version = version,
