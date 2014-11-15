@@ -352,3 +352,6 @@ class ResourceTestCase(unittest.TestCase):
         resp = client.test.get()
 
         self.assertEqual(resp['result'], ['a', 'b', 'c'])
+
+    def test_url(self):
+        self.assertEqual(self.base_resource.url(), "http://example/api/v1/test")

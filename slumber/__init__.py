@@ -83,10 +83,7 @@ class Resource(ResourceAttributesMixin, object):
 
     def _request(self, method, data=None, files=None, params=None):
         s = self._store["serializer"]
-        url = self._store["base_url"]
-
-        if self._store["append_slash"] and not url.endswith("/"):
-            url = url + "/"
+        url = self.url()
 
         headers = {"accept": s.get_content_type()}
 
@@ -125,6 +122,14 @@ class Resource(ResourceAttributesMixin, object):
             return stype.loads(resp.content)
         else:
             return resp.content
+
+    def url(self):
+        url = self._store["base_url"]
+
+        if self._store["append_slash"] and not url.endswith("/"):
+            url = url + "/"
+
+        return url
 
     def get(self, **kwargs):
         resp = self._request("GET", params=kwargs)
