@@ -13,6 +13,7 @@ if sys.argv[-1] == 'publish':
     os.system("git tag -a %s -m 'v%s'" % (version, version))
     os.system("python setup.py sdist bdist_wheel upload -r pypi")
     print("Published version %s, do `git push --tags` to push new tag to remote" % version)
+    sys.exit()
 
 setup(
     name = "slumber",

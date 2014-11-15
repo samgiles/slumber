@@ -3,3 +3,4 @@ docs/_build/*
 .tox
 *.pyc
 slumber.egg-info
+build/
