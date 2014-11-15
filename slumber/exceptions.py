@@ -1,3 +1,6 @@
+from .utils import url_join, iterator
+
+
 class SlumberBaseException(Exception):
     """
     All Slumber exceptions inherit from this exception.
@@ -10,7 +13,7 @@ class SlumberHttpBaseException(SlumberBaseException):
     """
 
     def __init__(self, *args, **kwargs):
-        for key, value in kwargs.iteritems():
+        for key, value in iterator(kwargs):
             setattr(self, key, value)
         super(SlumberHttpBaseException, self).__init__(*args)
 
