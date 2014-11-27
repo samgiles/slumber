@@ -416,6 +416,18 @@ class ResourceTestCase(unittest.TestCase):
 
         self.assertEqual(resp['result'], ['a', 'b', 'c'])
 
+    def test_api_subclass(self):
+        class SubclassedResource(slumber.Resource):
+            pass
+
+        class SubclassedAPI(slumber.API):
+            resource_class = SubclassedResource
+
+        client = SubclassedAPI(base_url="http://example/api/v1")
+
+        self.assertIsInstance(client.test, SubclassedResource)
+        self.assertIsInstance(client.test(1).other(2).more, SubclassedResource)
+
     def test_url(self):
         self.assertEqual(self.base_resource.url(), "http://example/api/v1/test")
 
