@@ -111,7 +111,7 @@ class Resource(ResourceAttributesMixin, object):
     def _try_to_serialize_response(self, resp):
         s = self._store["serializer"]
 
-        if resp.headers.get("content-type", None):
+        if resp.headers.get("content-type", None) and resp.content:
             content_type = resp.headers.get("content-type").split(";")[0].strip()
 
             try:
@@ -123,6 +123,14 @@ class Resource(ResourceAttributesMixin, object):
         else:
             return resp.content
 
+    def _process_response(self, resp):
+        # TODO: something to expose headers and status
+
+        if 200 <= resp.status_code <= 299:
+            return self._try_to_serialize_response(resp)
+        else:
+            return  # @@@ We should probably do some sort of error here? (Is this even possible?)
+
     def url(self):
         url = self._store["base_url"]
 
@@ -131,40 +139,30 @@ class Resource(ResourceAttributesMixin, object):
 
         return url
 
+    # TODO: refactor these methods - lots of commonality
     def get(self, **kwargs):
         resp = self._request("GET", params=kwargs)
-        if 200 <= resp.status_code <= 299:
-            return self._try_to_serialize_response(resp)
-        else:
-            return  # @@@ We should probably do some sort of error here? (Is this even possible?)
+        return self._process_response(resp)
+
+    def options(self, **kwargs):
+        resp = self._request("OPTIONS", params=kwargs)
+        return self._process_response(resp)
+
+    def head(self, **kwargs):
+        resp = self._request("HEAD", params=kwargs)
+        return self._process_response(resp)
 
     def post(self, data=None, files=None, **kwargs):
-        s = self._store["serializer"]
-
         resp = self._request("POST", data=data, files=files, params=kwargs)
-        if 200 <= resp.status_code <= 299:
-            return self._try_to_serialize_response(resp)
-        else:
-            # @@@ Need to be Some sort of Error Here or Something
-            return
+        return self._process_response(resp)
 
     def patch(self, data=None, files=None, **kwargs):
-        s = self._store["serializer"]
-
         resp = self._request("PATCH", data=data, files=files, params=kwargs)
-        if 200 <= resp.status_code <= 299:
-            return self._try_to_serialize_response(resp)
-        else:
-            # @@@ Need to be Some sort of Error Here or Something
-            return
+        return self._process_response(resp)
 
     def put(self, data=None, files=None, **kwargs):
         resp = self._request("PUT", data=data, files=files, params=kwargs)
-
-        if 200 <= resp.status_code <= 299:
-            return self._try_to_serialize_response(resp)
-        else:
-            return False
+        return self._process_response(resp)
 
     def delete(self, **kwargs):
         resp = self._request("DELETE", params=kwargs)

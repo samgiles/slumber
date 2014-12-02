@@ -71,6 +71,69 @@ class ResourceTestCase(unittest.TestCase):
         resp = self.base_resource.get()
         self.assertEqual(resp, r.content)
 
+    def test_options_200_json(self):
+        r = mock.Mock(spec=requests.Response)
+        r.status_code = 200
+        r.headers = {"content-type": "application/json"}
+        r.content = '{"actions": {"POST": {"foo": {"required": false, "type": "string"}}}}'
+
+        self.base_resource._store.update({
+            "session": mock.Mock(spec=requests.Session),
+            "serializer": slumber.serialize.Serializer(),
+        })
+        self.base_resource._store["session"].request.return_value = r
+
+        resp = self.base_resource._request("OPTIONS")
+
+        self.assertTrue(resp is r)
+        self.assertEqual(resp.content, r.content)
+
+        self.base_resource._store["session"].request.assert_called_once_with(
+            "OPTIONS",
+            "http://example/api/v1/test",
+            data=None,
+            files=None,
+            params=None,
+            headers={"content-type": self.base_resource._store["serializer"].get_content_type(),
+                     "accept": self.base_resource._store["serializer"].get_content_type()}
+        )
+
+        resp = self.base_resource.options()
+        self.assertTrue('POST' in resp['actions'])
+        self.assertTrue('foo' in resp['actions']['POST'])
+        self.assertTrue('type' in resp['actions']['POST']['foo'])
+        self.assertEqual(resp['actions']['POST']['foo']['type'], 'string')
+
+    def test_head_200_json(self):
+        r = mock.Mock(spec=requests.Response)
+        r.status_code = 200
+        r.headers = {"content-type": "application/json"}
+        r.content = ''
+
+        self.base_resource._store.update({
+            "session": mock.Mock(spec=requests.Session),
+            "serializer": slumber.serialize.Serializer(),
+        })
+        self.base_resource._store["session"].request.return_value = r
+
+        resp = self.base_resource._request("HEAD")
+
+        self.assertTrue(resp is r)
+        self.assertEqual(resp.content, r.content)
+
+        self.base_resource._store["session"].request.assert_called_once_with(
+            "HEAD",
+            "http://example/api/v1/test",
+            data=None,
+            files=None,
+            params=None,
+            headers={"content-type": self.base_resource._store["serializer"].get_content_type(),
+                     "accept": self.base_resource._store["serializer"].get_content_type()}
+        )
+
+        resp = self.base_resource.head()
+        self.assertEqual(resp, r.content)
+
     def test_post_201_redirect(self):
         r1 = mock.Mock(spec=requests.Response)
         r1.status_code = 201
