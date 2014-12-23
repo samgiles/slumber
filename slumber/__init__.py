@@ -82,15 +82,15 @@ class Resource(ResourceAttributesMixin, object):
         return self.__class__(**kwargs)
 
     def _request(self, method, data=None, files=None, params=None):
-        s = self._store["serializer"]
+        serializer = self._store["serializer"]
         url = self.url()
 
-        headers = {"accept": s.get_content_type()}
+        headers = {"accept": serializer.get_content_type()}
 
         if not files:
-            headers["content-type"] = s.get_content_type()
+            headers["content-type"] = serializer.get_content_type()
             if data is not None:
-                data = s.dumps(data)
+                data = serializer.dumps(data)
 
         resp = self._store["session"].request(method, url, data=data, params=params, files=files, headers=headers)
 
