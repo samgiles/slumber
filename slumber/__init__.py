@@ -14,15 +14,19 @@ __all__ = ["Resource", "API"]
 
 class ResourceAttributesMixin(object):
     """
-    A Mixin that makes it so that accessing an undefined attribute on a class
-    results in returning a Resource Instance. This Instance can then be used
-    to make calls to the a Resource.
+    A Mixin that allows access to an undefined attribute on a class.
+    Instead of raising an attribute error, the undefined attribute will
+	return a Resource Instance which can be used to make calls to the
+	resource identified by the attribute.
 
     It assumes that a Meta class exists at self._meta with all the required
     attributes.
     """
 
     def __getattr__(self, item):
+		# Don't allow access to 'private' by convention attributes.
+		# @@@: How would this work with resources names that begin with
+		# underscores?
         if item.startswith("_"):
             raise AttributeError(item)
 
