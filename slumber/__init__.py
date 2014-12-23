@@ -7,7 +7,7 @@ except ImportError:
 
 from . import exceptions
 from .serialize import Serializer
-from .utils import url_join, iterator
+from .utils import url_join, iterator, copy_kwargs
 
 __all__ = ["Resource", "API"]
 
@@ -30,10 +30,7 @@ class ResourceAttributesMixin(object):
         if item.startswith("_"):
             raise AttributeError(item)
 
-        kwargs = {}
-        for key, value in iterator(self._store):
-            kwargs[key] = value
-
+        kwargs = copy_kwargs(self._store)
         kwargs.update({"base_url": url_join(self._store["base_url"], item)})
 
         return Resource(**kwargs)
@@ -65,9 +62,7 @@ class Resource(ResourceAttributesMixin, object):
         if id is None and format is None and url_override is None:
             return self
 
-        kwargs = {}
-        for key, value in iterator(self._store):
-            kwargs[key] = value
+        kwargs = copy_kwargs(self._store)
 
         if id is not None:
             kwargs["base_url"] = url_join(self._store["base_url"], id)

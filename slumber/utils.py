@@ -15,6 +15,12 @@ def url_join(base, *args):
     path = posixpath.join(path, *[('%s' % x) for x in args])
     return urlunsplit([scheme, netloc, path, query, fragment])
 
+def copy_kwargs(dictionary):
+	kwargs = {}
+	for key, value in iterator(dictionary):
+		kwargs[key] = value
+
+	return kwargs
 
 def iterator(d):
     """

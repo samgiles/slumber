@@ -7,6 +7,9 @@ import slumber
 
 class UtilsTestCase(unittest.TestCase):
 
+    def test_copy_kwargs(self):
+        self.assertEqual({ 'x': 1 }, slumber.copy_kwargs({ 'x': 1 }))
+
     def test_url_join_http(self):
         self.assertEqual(slumber.url_join("http://example.com/"), "http://example.com/")
         self.assertEqual(slumber.url_join("http://example.com/", "test"), "http://example.com/test")
