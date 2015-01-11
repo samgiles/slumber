@@ -184,6 +184,8 @@ class API(ResourceAttributesMixin, object):
 
         if session is None:
             session = requests.session()
+
+        if auth is not None:
             session.auth = auth
 
         self._store = {
