@@ -45,7 +45,7 @@ class JsonSerializer(BaseSerializer):
     key = "json"
 
     def loads(self, data):
-        return json.loads(data)
+        return json.loads(str(data))
 
     def dumps(self, data):
         return json.dumps(data)
@@ -57,7 +57,7 @@ class YamlSerializer(BaseSerializer):
     key = "yaml"
 
     def loads(self, data):
-        return yaml.safe_load(data)
+        return yaml.safe_load(str(data))
 
     def dumps(self, data):
         return yaml.dump(data)
