@@ -492,3 +492,22 @@ class ResourceTestCase(unittest.TestCase):
 
         resp = self.base_resource.get()
         self.assertEqual(resp['result'], ['a', 'b', 'c'])
+
+    def test_post_201_does_get(self):
+        getparams = dict(username="luser", api_key="1234")
+        postparams = dict(key1=1, key2="two")
+        listuri = "http://example/api/v1/"
+        newuri = "http://example/api/v1/myres/newthing/"
+        ses = mock.Mock(spec=requests.session())
+        ses.request.return_value.status_code = 201
+        ses.request.return_value.headers = { "location": newuri }
+        api = slumber.API(listuri, session=ses)
+        api.myres.post(postparams, **getparams)
+        self.assertEqual(ses.request.call_count, 2)
+        ses.request.assert_called_with('GET', newuri,
+                headers={
+                    'content-type': 'application/json',
+                    'accept': 'application/json'
+                    },
+                params=getparams,
+                data=None)
