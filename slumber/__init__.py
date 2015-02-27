@@ -16,8 +16,8 @@ class ResourceAttributesMixin(object):
     """
     A Mixin that allows access to an undefined attribute on a class.
     Instead of raising an attribute error, the undefined attribute will
-	return a Resource Instance which can be used to make calls to the
-	resource identified by the attribute.
+    return a Resource Instance which can be used to make calls to the
+    resource identified by the attribute.
 
     The type of the resource returned can be overridden by adding a
     resource_class attribute.
@@ -27,9 +27,9 @@ class ResourceAttributesMixin(object):
     """
 
     def __getattr__(self, item):
-		# Don't allow access to 'private' by convention attributes.
-		# @@@: How would this work with resources names that begin with
-		# underscores?
+        # Don't allow access to 'private' by convention attributes.
+        # @@@: How would this work with resources names that begin with
+        # underscores?
         if item.startswith("_"):
             raise AttributeError(item)
 
@@ -97,7 +97,7 @@ class Resource(ResourceAttributesMixin, object):
         resp = self._store["session"].request(method, url, data=data, params=params, files=files, headers=headers)
 
         if 400 <= resp.status_code <= 499:
-            exception_class = exceptions.Http404Error if resp.status_code == 404 else exceptions.HttpClientError
+            exception_class = exceptions.HttpNotFoundError if resp.status_code == 404 else exceptions.HttpClientError
             raise exception_class("Client Error %s: %s" % (resp.status_code, url), response=resp, content=resp.content)
         elif 500 <= resp.status_code <= 599:
             raise exceptions.HttpServerError("Server Error %s: %s" % (resp.status_code, url), response=resp, content=resp.content)

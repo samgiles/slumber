@@ -385,6 +385,21 @@ class ResourceTestCase(unittest.TestCase):
         with self.assertRaises(exceptions.HttpClientError):
             self.base_resource.req._request("GET")
 
+    def test_get_404_response(self):
+        r = mock.Mock(spec=requests.Response)
+        r.status_code = 404
+        r.headers = {"content-type": "application/json"}
+        r.content = ''
+
+        self.base_resource._store.update({
+            "session": mock.Mock(spec=requests.Session),
+            "serializer": slumber.serialize.Serializer(),
+        })
+        self.base_resource._store["session"].request.return_value = r
+
+        with self.assertRaises(exceptions.HttpNotFoundError):
+            self.base_resource.req._request("GET")
+
     def test_get_500_response(self):
         r = mock.Mock(spec=requests.Response)
         r.status_code = 500
