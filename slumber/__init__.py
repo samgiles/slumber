@@ -81,7 +81,7 @@ class Resource(ResourceAttributesMixin, object):
 
         kwargs["session"] = self._store["session"]
 
-        return self.__class__(**kwargs)
+        return self._get_resource(**kwargs)
 
     def _request(self, method, data=None, files=None, params=None):
         serializer = self._store["serializer"]
