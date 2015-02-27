@@ -118,6 +118,11 @@ class Resource(ResourceAttributesMixin, object):
             except exceptions.SerializerNotAvailable:
                 return resp.content
 
+            if type(resp.content) == bytes:
+                try:
+                    return stype.loads(resp.content.decode())
+                except:
+                    return resp.content
             return stype.loads(resp.content)
         else:
             return resp.content

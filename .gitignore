@@ -5,3 +5,6 @@ docs/_build/*
 slumber.egg-info
 build/
 .coverage
+/.project
+/.pydevproject
+/.settings/
