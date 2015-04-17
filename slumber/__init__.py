@@ -109,7 +109,7 @@ class Resource(ResourceAttributesMixin, object):
     def _handle_redirect(self, resp, **kwargs):
         # @@@ Hacky, see description in __call__
         resource_obj = self(url_override=resp.headers["location"])
-        return resource_obj.get(params=kwargs)
+        return resource_obj.get(**kwargs)
 
     def _try_to_serialize_response(self, resp):
         s = self._store["serializer"]

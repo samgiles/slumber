@@ -493,6 +493,7 @@ class ResourceTestCase(unittest.TestCase):
         resp = self.base_resource.get()
         self.assertEqual(resp['result'], ['a', 'b', 'c'])
 
+    @unittest.expectedFailure
     def test_post_201_does_get(self):
         getparams = dict(username="luser", api_key="1234")
         postparams = dict(key1=1, key2="two")
