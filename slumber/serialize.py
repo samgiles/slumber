@@ -45,7 +45,7 @@ class JsonSerializer(BaseSerializer):
     key = "json"
 
     def loads(self, data):
-        return json.loads(str(data))
+        return json.loads(data)
 
     def dumps(self, data):
         return json.dumps(data)

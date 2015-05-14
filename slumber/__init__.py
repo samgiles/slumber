@@ -126,7 +126,8 @@ class Resource(ResourceAttributesMixin, object):
 
             if type(resp.content) == bytes:
                 try:
-                    return stype.loads(resp.content.decode())
+                    encoding = requests.utils.guess_json_utf(resp.content)
+                    return stype.loads(resp.content.decode(encoding))
                 except:
                     return resp.content
             return stype.loads(resp.content)
