@@ -7,6 +7,11 @@ Changelog
 development version
 -------------------
 
+0.7.1
+-----
+
+* Correct support for UTF encoded responses.
+
 0.6.2
 -----
 
