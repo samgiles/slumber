@@ -7,7 +7,7 @@ into urls, and it is a serializer/deserializer helper.
 Python to Url Translation
 -------------------------
 
-The Url Translation portion of slumber is fairly simple but powerful. It is
+The url translation portion of slumber is fairly simple but powerful. It is
 basically a list of url fragments that get joined together.
 
 In the call::
@@ -31,11 +31,14 @@ Slumber translates it to::
 
 Nested Resources follow the same principle.
 
-The other part of an url that Slumber translates is kwargs to ``get()``, ``post()``,
-``put()``, ``delete()`` into query string params. This again is a fairly simple 
+The other part of an url that Slumber translates is keyword arguments (kwargs) to ``get()``, ``post()``,
+``put()``, ``delete()`` into query string params. This again is a fairly simple
 operation which then gets added to the end of the url.
 
-The Final portion of Slumber's Python to HTTP is that the first arg passed to 
+There are also helpful utiltity methods such as ``url()`` which return the
+final string representation of a resource.
+
+The Final portion of Slumber's Python to HTTP is that the first arg passed to
 each of the HTTP functions is serialized, and then passed into the HTTP request
 as the body of the request.
 

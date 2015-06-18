@@ -28,7 +28,7 @@ And slumber will attempt to use those credentials with each request.
 With Tastypie ApikeyAuthentication you can use::
 
     from requests.auth import AuthBase
-    
+
     class TastypieApikeyAuth(AuthBase):
         def __init__(self, username, apikey):
             self.username = username
@@ -44,6 +44,28 @@ To Use Digest or OAuth please consult the requests documentation. The auth
 argument is passed directly to requests and thus works exactly the same way
 and accepts exactly the same arguments.
 
+Custom Session objects
+======================
+
+If the properties of the underlying request needs to be controlled in some way
+Slumber doesn't support out of the box a ``requests.Session`` object can be
+created and passed into the ``slumber.API`` constructor::
+
+    API("http://path/to/my/api", session=requests.Session())
+
+
+This allows you to control things like proxy settings, default query
+parameters, event handling hooks, and SSL certificate handling information.
+
+SSL Certificates
+----------------
+
+Turning SSL certificate verification off::
+
+    API("https://path/to/my/api", session=requests.Session(verify=False))
+
+For more information see the documentation for ``requests.Session``.
+
 File uploads
 ============
 
@@ -51,7 +73,7 @@ You may upload files by supplying a dictionary in the form {'key': file-like-obj
 ``files`` parameter in ``post``, ``patch`` or ``put`` calls.  E.g.::
 
     with open('/home/philip/out.txt') as fp:
-        api.file.post({'name': 'my file'}, files={'file': fp}) 
+        api.file.post({'name': 'my file'}, files={'file': fp})
 
 Will do a POST to ``/api/file/`` with a multipart-form-data request.
 
