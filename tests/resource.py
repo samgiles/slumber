@@ -496,10 +496,17 @@ class ResourceTestCase(unittest.TestCase):
         apiuri = "http://example/api/v1/"
         newuri = "http://example/api/v1/myresource/"
         ses = mock.Mock(spec=requests.session())
+        r = mock.Mock(spec=requests.Response)
+        r.status_code = 201
+        r.headers = {}
+        ses.request.return_value = r
+
         api = slumber.API(apiuri, session=ses)
 
         # Empty post request
         api.myresource.post()
+        ses.return_value.status_code = 201
+        ses.return_value.headers = {}
         self.assertEqual(ses.request.call_count, 1)
 
         ses.request.assert_called_with('POST', newuri,
@@ -510,7 +517,7 @@ class ResourceTestCase(unittest.TestCase):
                 files=None,
                 params={})
 
-        api.myresource.post({'key': 'value'})
+        api.myresource.post(dict(key='value'))
         self.assertEqual(ses.request.call_count, 2)
         ses.request.assert_called_with('POST', newuri,
                 headers={
