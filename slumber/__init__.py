@@ -138,9 +138,15 @@ class Resource(ResourceAttributesMixin, object):
         # TODO: something to expose headers and status
 
         if 200 <= resp.status_code <= 299:
-            return self._try_to_serialize_response(resp)
+            decoded = self._try_to_serialize_response(resp)
         else:
-            return  # @@@ We should probably do some sort of error here? (Is this even possible?)
+            # @@@ We should probably do some sort of error here? (Is this even possible?)
+            decoded = None
+
+        if self._store["verbose"]:
+            return (resp, decoded)
+
+        return decoded
 
     def url(self):
         url = self._store["base_url"]
@@ -193,7 +199,9 @@ class API(ResourceAttributesMixin, object):
 
     resource_class = Resource
 
-    def __init__(self, base_url=None, auth=None, format=None, append_slash=True, session=None, serializer=None):
+    def __init__(self, base_url=None, auth=None,
+                 format=None, append_slash=True,
+                 session=None, serializer=None, verbose=False):
         if serializer is None:
             serializer = Serializer(default=format)
 
@@ -209,6 +217,7 @@ class API(ResourceAttributesMixin, object):
             "append_slash": append_slash,
             "session": session,
             "serializer": serializer,
+            "verbose": verbose,
         }
 
         # Do some Checks for Required Values

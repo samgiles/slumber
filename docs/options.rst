@@ -134,3 +134,16 @@ Slashes
 Slumber assumes by default that all urls should end with a slash. If you do not
 want this behavior you can control it via the append_slash option which can be
 set by passing append_slash to the ``slumber.API`` kwargs.
+
+Verbose Responses
+=================
+
+By default Slumber will return a decoded representation of the response body,
+if one existed. If the `API` is constructed with `verbose=True`, then instead
+of returning a decoded representation, a tuple will be returned, where the
+first item is the actual `requests.Response` object, and the second is the
+decoded representation::
+
+    api = slumber.API("https://example.com/path/to/api", verbose=True)
+    (response, decoded) = api.subresource.get()
+

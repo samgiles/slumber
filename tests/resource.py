@@ -12,7 +12,7 @@ from slumber import exceptions
 class ResourceTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.base_resource = slumber.Resource(base_url="http://example/api/v1/test", format="json", append_slash=False)
+        self.base_resource = slumber.Resource(base_url="http://example/api/v1/test", format="json", append_slash=False, verbose=False)
 
     def test_get_200_json(self):
         r = mock.Mock(spec=requests.Response)
@@ -491,6 +491,40 @@ class ResourceTestCase(unittest.TestCase):
 
         resp = self.base_resource.get()
         self.assertEqual(resp['result'], ['a', 'b', 'c'])
+
+    def test_get_with_verbose(self):
+        r = mock.Mock(spec=requests.Response)
+        r.status_code = 200
+        r.headers = {"content-type": "application/json"}
+        r.content = '{"result": "a"}'
+
+        self.base_resource._store.update({
+            "session": mock.Mock(spec=requests.Session),
+            "serializer": slumber.serialize.Serializer(),
+            "verbose": True,
+        })
+        self.base_resource._store["session"].request.return_value = r
+
+        (response, decoded) = self.base_resource.get()
+
+        self.assertIsInstance(response, requests.Response)
+        self.assertEqual(decoded["result"], "a")
+
+    def test_all_resource_requests_are_verbose_if_set_in_api(self):
+        apiurl = "http://example/api/v1"
+        ses = mock.Mock(spec=requests.session())
+        r = mock.Mock(spec=requests.Response)
+        r.status_code = 200
+        r.headers = {}
+        ses.request.return_value = r
+
+        api = slumber.API(apiurl, session=ses, verbose=True)
+
+        (response, _) = api.myresource(1).subresource.get()
+        self.assertIsInstance(response, requests.Response)
+
+        (response, _) = api.myresource(1).get()
+        self.assertIsInstance(response, requests.Response)
 
     def test_send_content_type_only_if_body_data_exists(self):
         apiuri = "http://example/api/v1/"
